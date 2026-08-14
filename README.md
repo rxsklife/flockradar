@@ -11,7 +11,7 @@
 
 [![Follow us on Instagram](https://img.shields.io/badge/Follow%20us%20on%20Instagram-%40flockradar-%23E4405F?style=for-the-badge&logo=instagram&logoColor=white&labelColor=%230a1622)](https://www.instagram.com/flockradar)
 
-[flockradar.com](https://flockradar.com) · [The Map](https://flockradar.com/map) · [Methodology](https://flockradar.com/methodology) · [Submit a Tip](https://flockradar.com/submit) · [Donate](#support-the-work)
+[flockradar.com](https://flockradar.com) · [The Map](https://flockradar.com/map) · [Methodology](https://flockradar.com/methodology) · [Donate](#support-the-work)
 
 </div>
 
@@ -97,7 +97,6 @@ FlockRadar is free, open source, ad-free, and tracker-free. It runs on donations
 ```
 bc1qwsagnc3s25j225j5gfgg22e3eyjgz7vwt93f75
 ```
-Funds go to hosting, the PostGIS database, and research time. There is no paid tier and nothing is ever gated.
 
 ## FAQ
 
