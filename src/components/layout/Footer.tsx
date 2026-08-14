@@ -36,7 +36,7 @@ export default function Footer() {
         src="/bg-footer.jpg"
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full -scale-y-100 object-cover object-center opacity-60"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-60"
         width={1935}
         height={553}
         draggable={false}
