@@ -177,7 +177,6 @@ export default function FilterBar({
         </select>
       </div>
 
-      {}
       {onBasemapChange && (
         <div className="mt-3 border-t border-navy-700 pt-3">
           <label className="mb-1 block text-xs text-steel-300">Basemap</label>
@@ -207,7 +206,6 @@ export default function FilterBar({
         </div>
       )}
 
-      {}
       {onToggleCommunity && (
         <div className="mt-3 border-t border-navy-700 pt-3">
           <label className="flex cursor-pointer items-start gap-2">

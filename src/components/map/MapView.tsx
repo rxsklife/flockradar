@@ -925,10 +925,8 @@ export default function MapView() {
         <SearchBar onSelect={flyToEntity} />
       </div>
       {mapReady && mapInstance && <PrivacyRoute map={mapInstance} />}
-      {}
       {mapReady && <TutorialHint />}
 
-      {}
       <button
         onClick={() => setShowMobileFilters((v) => !v)}
         className="absolute bottom-4 left-4 z-[1000] rounded-lg bg-navy-900 px-4 py-2 text-sm font-semibold text-steel-100 shadow-lg ring-1 ring-navy-600 sm:hidden"
@@ -937,7 +935,6 @@ export default function MapView() {
         {showMobileFilters ? 'Close' : 'Filters'}
       </button>
 
-      {}
       {markerCount !== null && (
         <div className="absolute left-1/2 top-4 z-[1000] flex -translate-x-1/2 items-center gap-2 rounded-lg bg-navy-950/90 px-3 py-1.5 ring-1 ring-navy-600">
           <div className="text-center">
@@ -955,7 +952,6 @@ export default function MapView() {
         </div>
       )}
 
-      {}
       {markerCount === 0 && (
         <div className="absolute inset-0 z-[1000] flex items-center justify-center">
           <div className="mx-4 max-w-sm rounded-lg bg-navy-900/95 p-6 text-center shadow-lg ring-1 ring-navy-600">
@@ -977,7 +973,6 @@ export default function MapView() {
         </div>
       )}
 
-      {}
       <FilterBar
         filters={filters}
         onChange={handleFilterChange}
@@ -989,7 +984,6 @@ export default function MapView() {
       />
       <Legend />
 
-      {}
       {showMobileFilters && (
         <div className="absolute inset-x-0 bottom-16 z-[1000] mx-4 rounded-lg border border-navy-600 bg-navy-900 p-3 shadow-lg sm:hidden">
           <FilterBar
@@ -1005,7 +999,6 @@ export default function MapView() {
         </div>
       )}
 
-      {}
       {showLocateButton && userLocation && (
         <button
           onClick={() => {

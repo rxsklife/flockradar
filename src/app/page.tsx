@@ -81,14 +81,14 @@ async function getStats() {
   };
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
   const stats = await getStats();
 
   return (
     <>
-      {}
       <section className="relative flex min-h-[calc(100svh-102px)] items-center justify-center overflow-hidden sm:min-h-[calc(100vh-102px)]">
-        {}
         {/* eslint-disable-next-line @next/next/no-img-element -- static hero art */}
         <img
           src="/hero.jpg"
@@ -99,12 +99,10 @@ export default async function HomePage() {
           height={1152}
           draggable={false}
         />
-        {}
         <div
           aria-hidden="true"
           className="absolute inset-0 bg-gradient-to-b from-navy-950/85 via-navy-950/55 to-navy-950"
         />
-        {}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute left-1/2 top-1/2 h-[36rem] w-[64rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-radar-500/10 blur-3xl"
@@ -116,10 +114,8 @@ export default async function HomePage() {
               <p className="eyebrow eyebrow-term justify-center mono-data">{'// '}OPEN_SOURCE ALPR TRANSPARENCY</p>
             </Reveal>
 
-            {}
             <Reveal delay={80}>
               <div className="hud-frame relative mt-5 rounded-md border border-navy-600/60 bg-navy-900/55 px-4 py-2 text-left shadow-lg backdrop-blur-sm sm:mt-6 sm:px-8 sm:py-5">
-                {}
                 <div className="flex items-center justify-between gap-3">
                   <p className="mono-data flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-steel-400 sm:text-xs">
                     <span className="hud-led hud-led-ok" aria-hidden="true" />
@@ -129,7 +125,6 @@ export default async function HomePage() {
                     FLOCKRADAR
                   </p>
                 </div>
-                {}
                 <h1 className="font-chakra mt-2 text-center text-[1.5rem] leading-tight font-bold tracking-tight text-steel-100 sm:mt-5 sm:text-4xl">
                   Every marker is{' '}
                   <span className="font-marker inline-block -rotate-2 text-[1.12em] leading-none text-radar-300">
@@ -137,7 +132,6 @@ export default async function HomePage() {
                   </span>
                   , status-labeled, & source-linked.
                 </h1>
-                {}
                 <div className="mt-5 grid grid-cols-3 gap-2 sm:mt-7 sm:gap-3">
                   {[
                     { label: 'Agencies mapped', value: stats.entities },
@@ -180,7 +174,6 @@ export default async function HomePage() {
                   How It Works
                 </Link>
               </div>
-              {}
               <Link
                 href="/resources"
                 className="btn-secondary mx-auto mt-3 block w-full max-w-[16rem] px-4! py-2.5! sm:hidden!"
@@ -192,12 +185,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {}
       <LiveFeed />
 
-      {}
       <section className="relative bg-navy-950 pt-20 pb-14">
-        {}
         {/* eslint-disable-next-line @next/next/no-img-element -- static bg art */}
         <img
           src="/bg-alpr.jpg"
@@ -208,7 +198,6 @@ export default async function HomePage() {
           height={1152}
           draggable={false}
         />
-        {}
         <div
           aria-hidden="true"
           className="absolute inset-0 bg-gradient-to-b from-navy-950 via-navy-950/80 to-navy-950"
@@ -233,7 +222,6 @@ export default async function HomePage() {
             </Reveal>
           </div>
 
-          {}
           <div className="grid gap-6 sm:grid-cols-3">
             <Reveal>
               <div className="hud-card hud-scanlines card-lift h-full rounded-md border border-navy-700 bg-navy-800 p-5 shadow-sm">
@@ -297,7 +285,6 @@ export default async function HomePage() {
             </Reveal>
           </div>
 
-          {}
           <div className="mx-auto mt-16 max-w-5xl">
             <Reveal>
               <div className="text-center">
@@ -406,7 +393,6 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {}
           <div className="mx-auto mt-16 max-w-5xl">
             <Reveal>
               <div className="text-center">
@@ -447,7 +433,6 @@ export default async function HomePage() {
                     </div>
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-2">
-                        {}
                         {/* eslint-disable-next-line @next/next/no-img-element -- static icon */}
                         <img
                           src="/privacy-shield.png"
@@ -480,9 +465,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {}
       <section className="relative bg-navy-950 pt-8 pb-20">
-        {}
         {/* eslint-disable-next-line @next/next/no-img-element -- static bg art */}
         <img
           src="/bg-why.jpg"
@@ -530,9 +513,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {}
       <section className="relative bg-navy-950 pb-24 pt-4">
-        {}
         {/* eslint-disable-next-line @next/next/no-img-element -- static bg art */}
         <img
           src="/bg-cta.jpg"

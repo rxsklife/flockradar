@@ -11,7 +11,6 @@ export default function PageHeader({
 }) {
   return (
     <section className="relative w-full overflow-hidden">
-      {}
       {/* eslint-disable-next-line @next/next/no-img-element -- static bg art */}
       <img
         src="/hero.jpg"
@@ -39,7 +38,6 @@ export default function PageHeader({
           <p className="mt-4 text-lg leading-8 text-steel-300">{description}</p>
         </Reveal>
       </div>
-      {}
       <div aria-hidden="true" className="relative h-[2px] overflow-hidden border-b border-navy-700/80">
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-radar-400/70 to-transparent" />
       </div>

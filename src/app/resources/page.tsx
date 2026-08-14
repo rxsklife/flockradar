@@ -135,18 +135,15 @@ const researchAndPolicy: ResourceLink[] = [
 export default function ResourcesPage() {
   return (
     <>
-      {}
       <PageHeader
         eyebrow="Resources"
         title="Resources & Allies"
         description="Groups and projects working to keep license plate reader surveillance honest and accountable. Here are the maps, tools, and advocates doing the work."
       />
 
-      {}
       <section className="relative overflow-hidden">
         <HudBackdrop />
         <div className="relative">
-          {}
           <section className="mx-auto max-w-5xl px-4 pt-20 pb-12 sm:px-6 lg:px-8">
         <Reveal>
           <h2 className="mb-1 text-xl font-bold text-steel-100">Mapping &amp; Transparency Projects</h2>
@@ -164,7 +161,6 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      {}
       <section className="mx-auto max-w-5xl px-4 pb-12 sm:px-6 lg:px-8">
         <Reveal>
           <h2 className="mb-1 text-xl font-bold text-steel-100">
@@ -183,7 +179,6 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      {}
       <section className="mx-auto max-w-5xl px-4 pb-12 sm:px-6 lg:px-8">
         <Reveal>
           <h2 className="mb-1 text-xl font-bold text-steel-100">Research &amp; Data</h2>
@@ -200,7 +195,6 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      {}
       <section className="mx-auto max-w-5xl px-4 pb-20 sm:px-6 lg:px-8">
         <Reveal>
           <div className="card-lift relative overflow-hidden rounded-xl border border-navy-600 bg-gradient-to-br from-navy-800 to-navy-900 p-6">

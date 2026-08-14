@@ -31,7 +31,6 @@ export default function Footer() {
 
   return (
     <footer className="relative overflow-hidden border-t border-navy-700 bg-navy-950">
-      {}
       {/* eslint-disable-next-line @next/next/no-img-element -- static bg art */}
       <img
         src="/bg-footer.jpg"
@@ -42,13 +41,11 @@ export default function Footer() {
         height={553}
         draggable={false}
       />
-      {}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-gradient-to-b from-navy-950 via-navy-950/70 to-navy-950/30"
       />
       <div className="relative mx-auto max-w-7xl px-4 py-8 text-sm text-steel-400 sm:px-6 lg:px-8">
-        {}
         <div className="mb-5 flex flex-col items-center gap-2 sm:flex-row sm:justify-center sm:gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element -- static BTC logo */}
           <img
@@ -67,7 +64,6 @@ export default function Footer() {
             className="group relative inline-flex items-center gap-2 rounded border border-navy-600 bg-navy-800/60 px-3 py-1.5 font-mono text-xs text-steel-200 transition-colors duration-200 hover:border-radar-500/60 hover:text-radar-300"
           >
             <span>{BTC_ADDRESS}</span>
-            {}
             <span
               aria-hidden="true"
               className={`pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 rounded border border-radar-500/50 bg-navy-900 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-radar-300 whitespace-nowrap transition-all duration-200 ${
@@ -88,7 +84,6 @@ export default function Footer() {
             )}
           </button>
         </div>
-        {}
         <p className="whitespace-nowrap text-center text-[clamp(6px,1.95vw,10px)] leading-relaxed sm:text-[11px] lg:text-[clamp(10.5px,1.08vw,14px)]">
           FlockRadar is an open-source public-disclosure project. Every dot on the map links to a
           public record.
@@ -113,7 +108,6 @@ export default function Footer() {
             Request Correction
           </Link>
           <span aria-hidden="true" className="hidden sm:inline">·</span>
-          {}
           <span className="flex w-full items-center justify-center gap-x-3 sm:w-auto sm:gap-x-1.5">
             <SocialLinks iconClassName="h-5 w-5 sm:h-4 sm:w-4" />
           </span>

@@ -72,7 +72,6 @@ export default function Header() {
             );
           })}
         </div>
-        {}
         <div className="flex items-center gap-3 sm:hidden">
           <SocialLinks iconClassName="h-4 w-4" />
           <Link href="/map" className="btn-primary px-4! py-2!">

@@ -5,7 +5,6 @@ export default function Legend() {
         Legend
       </h3>
       <div className="space-y-2 text-xs text-steel-300">
-        {}
         <div className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element -- tiny decorative icon */}
           <img
@@ -16,7 +15,6 @@ export default function Legend() {
           />
           <span className="leading-tight">Law Enforcement Deployed</span>
         </div>
-        {}
         <div className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element -- tiny decorative icon */}
           <img
