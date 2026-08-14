@@ -3,7 +3,7 @@ import { Inter, Fira_Code, Permanent_Marker, Chakra_Petch } from 'next/font/goog
 import localFont from 'next/font/local';
 import './globals.css';
 import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import Footer from '@/components/layout/MapAwareFooter';
 import BackToTop from '@/components/BackToTop';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });

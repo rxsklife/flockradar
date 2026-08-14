@@ -28,13 +28,10 @@ export interface DeploymentWithEntity {
 }
 
 export interface SourceSummary {
-  id: string;
   url: string;
   sourceType: string;
   publisher: string | null;
   title: string | null;
-  sourceStrength: string;
-  publishedDate: string | null;
 }
 
 export interface MarkerProperties {

@@ -81,75 +81,91 @@ export async function GET(request: NextRequest) {
     .limit(5000);
 
 
-  const features: GeoJSONFeature[] = await Promise.all(
-    rows.map(async (row) => {
-      const claimRows = await db
+  const deploymentIds = rows.map((r) => r.deploymentId);
+  const claimRows = deploymentIds.length
+    ? await db
         .select({
+          deploymentId: claims.subjectId,
           sourceId: claims.sourceId,
           confidence: claims.confidence,
         })
         .from(claims)
-        .where(eq(claims.subjectId, row.deploymentId))
-        .limit(5);
+        .where(inArray(claims.subjectId, deploymentIds))
+    : [];
 
-      const sourceRows = claimRows.length
-        ? await db
-            .select({
-              id: sources.id,
-              url: sources.url,
-              sourceType: sources.sourceType,
-              publisher: sources.publisher,
-              title: sources.title,
-              sourceStrength: sources.sourceStrength,
-              publishedDate: sources.publishedDate,
-            })
-            .from(sources)
-            .where(
-              inArray(
-                sources.id,
-                claimRows.map((c) => c.sourceId),
-              ),
-            )
-            .limit(5)
-        : [];
+  const claimsByDeployment = new Map<string, typeof claimRows>();
+  for (const c of claimRows) {
+    const list = claimsByDeployment.get(c.deploymentId) ?? [];
+    if (list.length < 5) list.push(c);
+    claimsByDeployment.set(c.deploymentId, list);
+  }
 
-      const confidence = claimRows.some((c) => c.confidence === 'high')
-        ? 'high'
-        : claimRows.some((c) => c.confidence === 'medium')
-          ? 'medium'
-          : 'low';
+  const allSourceIds = [...new Set(claimRows.map((c) => c.sourceId))];
+  const sourceRows = allSourceIds.length
+    ? await db
+        .select({
+          id: sources.id,
+          url: sources.url,
+          sourceType: sources.sourceType,
+          publisher: sources.publisher,
+          title: sources.title,
+        })
+        .from(sources)
+        .where(inArray(sources.id, allSourceIds))
+    : [];
+  const sourcesById = new Map(sourceRows.map((s) => [s.id, s]));
 
-      return {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [row.longitude, row.latitude],
-        },
-        properties: {
-          id: row.locationId,
-          deploymentId: row.deploymentId,
-          entityName: row.entityName,
-          entityType: row.entityType,
-          state: row.state,
-          status: row.status,
-          vendor: row.vendor || 'unknown',
-          precisionLevel: row.precisionLevel,
-          facingDirection: row.facingDirection,
-          locationStatus: row.locationStatus,
-          description: row.description,
-          lastVerifiedAt: row.lastVerifiedAt,
-          cameraCount: row.cameraCount,
-          retentionPeriod: row.retentionPeriod,
-          contractValue: row.contractValue,
-          confidence,
-          sources: sourceRows,
-          isExactLocation:
-            row.locationStatus === 'officially_disclosed' ||
-            row.locationStatus === 'verified_submission',
-        },
-      };
-    }),
-  );
+  const features: GeoJSONFeature[] = rows.map((row) => {
+    const claimsFor = claimsByDeployment.get(row.deploymentId) ?? [];
+    const confidence = claimsFor.some((c) => c.confidence === 'high')
+      ? 'high'
+      : claimsFor.some((c) => c.confidence === 'medium')
+        ? 'medium'
+        : 'low';
+
+    const sources = claimsFor
+      .map((c) => sourcesById.get(c.sourceId))
+      .filter((s): s is NonNullable<typeof s> => Boolean(s))
+      .map((s) => ({
+        title: s.title,
+        sourceType: s.sourceType,
+        url: s.url,
+        publisher: s.publisher,
+      }));
+
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [
+          Math.round(row.longitude * 1e5) / 1e5,
+          Math.round(row.latitude * 1e5) / 1e5,
+        ],
+      },
+      properties: {
+        id: row.locationId,
+        deploymentId: row.deploymentId,
+        entityName: row.entityName,
+        entityType: row.entityType,
+        state: row.state,
+        status: row.status,
+        vendor: row.vendor || 'unknown',
+        precisionLevel: row.precisionLevel,
+        facingDirection: row.facingDirection,
+        locationStatus: row.locationStatus,
+        description: row.description,
+        lastVerifiedAt: row.lastVerifiedAt,
+        cameraCount: row.cameraCount,
+        retentionPeriod: row.retentionPeriod,
+        contractValue: row.contractValue,
+        confidence,
+        sources,
+        isExactLocation:
+          row.locationStatus === 'officially_disclosed' ||
+          row.locationStatus === 'verified_submission',
+      },
+    };
+  });
 
   const geojson: LocationGeoJSON = {
     type: 'FeatureCollection',

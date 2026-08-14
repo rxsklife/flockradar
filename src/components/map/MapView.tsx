@@ -310,6 +310,9 @@ export default function MapView() {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const userLocationRef = useRef<[number, number] | null>(null);
 
+  const pendingLocRef = useRef<[number, number] | null>(null);
+  const pendingAccRef = useRef(40);
+
   const userDotLayerRef = useRef<L.Layer | null>(null);
   const [showLocateButton, setShowLocateButton] = useState(false);
   const locateCheckRef = useRef<(() => void) | null>(null);
@@ -719,11 +722,35 @@ export default function MapView() {
   );
 
   useEffect(() => {
+    if (!('geolocation' in navigator) || !('permissions' in navigator)) return;
+    let cancelled = false;
+    navigator.permissions
+      .query({ name: 'geolocation' as PermissionName })
+      .then((status) => {
+        if (status.state !== 'granted' || cancelled) return;
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            if (cancelled) return;
+            pendingLocRef.current = [pos.coords.latitude, pos.coords.longitude];
+            pendingAccRef.current = pos.coords.accuracy ?? 40;
+          },
+          () => {},
+          { maximumAge: 60000, timeout: 6000 },
+        );
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
+    const pending = pendingLocRef.current;
     const m = L.map(mapContainer.current, {
-      center: MAP_CENTER,
-      zoom: MAP_ZOOM,
+      center: pending ?? MAP_CENTER,
+      zoom: pending ? 17 : MAP_ZOOM,
       zoomControl: false,
       attributionControl: true,
     });
@@ -804,6 +831,36 @@ export default function MapView() {
     setMapInstance(m);
     setMapReady(true);
 
+    const drawUserDot = (ll: [number, number], accuracy: number) => {
+      const dotGroup = L.layerGroup([
+        L.circle(ll, {
+          radius: Math.max(accuracy, 20),
+          color: '#3b82f6',
+          weight: 1,
+          opacity: 0.35,
+          fillColor: '#3b82f6',
+          fillOpacity: 0.12,
+        }),
+        L.circleMarker(ll, {
+          radius: 7,
+          color: '#ffffff',
+          weight: 2.5,
+          fillColor: '#3b82f6',
+          fillOpacity: 1,
+        }),
+      ]);
+      userDotLayerRef.current?.remove();
+      dotGroup.addTo(m);
+      userDotLayerRef.current = dotGroup;
+    };
+
+    if (pending) {
+      const ll = pending as [number, number];
+      userLocationRef.current = ll;
+      setUserLocation(ll);
+      drawUserDot(ll, pendingAccRef.current);
+    }
+
 
 
 
@@ -815,9 +872,7 @@ export default function MapView() {
     void toggleCommunityLayer(true);
 
 
-    if ('geolocation' in navigator) {
-
-
+    if (!pending && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           if (map.current !== m) return;
@@ -826,36 +881,13 @@ export default function MapView() {
           userLocationRef.current = ll;
 
           const accuracy = pos.coords.accuracy ?? 40;
-          const dotGroup = L.layerGroup([
-            L.circle(ll, {
-              radius: Math.max(accuracy, 20),
-              color: '#3b82f6',
-              weight: 1,
-              opacity: 0.35,
-              fillColor: '#3b82f6',
-              fillOpacity: 0.12,
-            }),
-            L.circleMarker(ll, {
-              radius: 7,
-              color: '#ffffff',
-              weight: 2.5,
-              fillColor: '#3b82f6',
-              fillOpacity: 1,
-            }),
-          ]);
-          userDotLayerRef.current?.remove();
-          dotGroup.addTo(m);
-          userDotLayerRef.current = dotGroup;
+          drawUserDot(ll, accuracy);
 
           if (!interactedRef.current) {
-
-
-
-            m.flyTo(ll, 17, { duration: 800 });
+            m.setView(ll, 17, { animate: false });
           }
         },
         () => {
-
           setUserLocation(null);
           userLocationRef.current = null;
         },
@@ -1005,7 +1037,7 @@ export default function MapView() {
             const m = map.current;
 
 
-            if (m && userLocation) m.setView(userLocation, 17);
+            if (m && userLocation) m.setView(userLocation, 17, { animate: false });
           }}
           className="absolute bottom-20 left-4 z-[1000] flex h-11 w-11 items-center justify-center rounded-full border border-navy-600 bg-navy-900 text-radar-400 shadow-lg transition-colors hover:bg-navy-800 hover:text-radar-300 sm:bottom-4"
           aria-label="Snap back to my location"
