@@ -1,0 +1,25 @@
+name: Feed warmup
+on:
+  schedule:
+    # Every 15 minutes — keeps the live-feed API warm and the 10-min cache fresh
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+    steps:
+      - name: Warm homepage + feed endpoint
+        run: |
+          for url in "$SITE_URL/" "$SITE_URL/api/feed"; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 -A 'FlockRadar-warmup' "$url" || echo 000)
+            echo "$url -> $code"
+            if [ "$code" != "200" ]; then exit 1; fi
+          done
+        env:
+          SITE_URL: ${{ env.SITE_URL || 'https://flockradar.com' }}

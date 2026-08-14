@@ -1,0 +1,246 @@
+'use client';
+
+import { useState } from 'react';
+import { statusLegend } from '@/lib/legend';
+
+interface FilterBarProps {
+  filters: Record<string, string | undefined>;
+  onChange: (key: string, value: string) => void;
+  variant?: 'desktop' | 'mobile';
+  communityLayerOn?: boolean;
+  onToggleCommunity?: (on: boolean) => void;
+  communityLoading?: boolean;
+  basemap?: 'dark' | 'detailed';
+  onBasemapChange?: (mode: 'dark' | 'detailed') => void;
+}
+
+const ENTITY_TYPES = [
+  'city',
+  'county',
+  'police_department',
+  'sheriff',
+  'school_district',
+  'hoa',
+  'transit_agency',
+];
+
+const VENDORS = ['Flock Safety', 'other', 'unknown'];
+
+const STATES = [
+  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME',
+  'MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA',
+  'RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY',
+];
+
+export default function FilterBar({
+  filters,
+  onChange,
+  variant = 'desktop',
+  communityLayerOn = false,
+  onToggleCommunity,
+  communityLoading = false,
+  basemap = 'dark',
+  onBasemapChange,
+}: FilterBarProps) {
+  const isMobile = variant === 'mobile';
+
+
+  const [open, setOpen] = useState(false);
+
+  if (!isMobile && !open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="absolute right-4 top-4 z-[1000] hidden items-center gap-1.5 rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-xs font-semibold text-steel-200 shadow-lg transition-colors hover:bg-navy-800 sm:flex"
+        aria-label="Open filters"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 5h18l-7 9v5l-4-2v-3L3 5z" />
+        </svg>
+        Filters
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className={
+        isMobile
+          ? 'w-full'
+          : 'absolute right-4 top-4 z-[1000] hidden w-56 rounded-lg border border-navy-600 bg-navy-900 p-3 shadow-lg sm:block'
+      }
+    >
+      <div className="mb-2 flex items-center justify-between">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-steel-400">
+          Filters
+        </h3>
+        {!isMobile && (
+          <button
+            onClick={() => setOpen(false)}
+            className="rounded p-0.5 text-steel-400 transition-colors hover:bg-navy-800 hover:text-steel-100"
+            aria-label="Close filters"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      <div className="mb-3">
+        <label className="mb-1 block text-xs text-steel-300">State</label>
+        <select
+          value={filters.state || ''}
+          onChange={(e) => onChange('state', e.target.value)}
+          className="w-full rounded border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-steel-100"
+        >
+          <option value="">All states</option>
+          {STATES.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mb-3">
+        <label className="mb-1 block text-xs text-steel-300">Status</label>
+        <select
+          value={filters.status || ''}
+          onChange={(e) => onChange('status', e.target.value)}
+          className="w-full rounded border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-steel-100"
+        >
+          <option value="">All</option>
+          {statusLegend.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mb-3">
+        <label className="mb-1 block text-xs text-steel-300">Entity type</label>
+        <select
+          value={filters.entityType || ''}
+          onChange={(e) => onChange('entityType', e.target.value)}
+          className="w-full rounded border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-steel-100"
+        >
+          <option value="">All</option>
+          {ENTITY_TYPES.map((t) => (
+            <option key={t} value={t}>
+              {t.replace(/_/g, ' ')}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mb-3">
+        <label className="mb-1 block text-xs text-steel-300">Vendor</label>
+        <select
+          value={filters.vendor || ''}
+          onChange={(e) => onChange('vendor', e.target.value)}
+          className="w-full rounded border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-steel-100"
+        >
+          <option value="">All</option>
+          {VENDORS.map((v) => (
+            <option key={v} value={v}>
+              {v}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mb-3">
+        <label className="mb-1 block text-xs text-steel-300">Evidence level</label>
+        <select
+          value={filters.sourceStrength || ''}
+          onChange={(e) => onChange('sourceStrength', e.target.value)}
+          className="w-full rounded border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-steel-100"
+        >
+          <option value="">All evidence</option>
+          <option value="primary">Primary source only</option>
+          <option value="secondary">Primary or secondary</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs text-steel-300">Point type</label>
+        <select
+          value={filters.pointType || ''}
+          onChange={(e) => onChange('pointType', e.target.value)}
+          className="w-full rounded border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-steel-100"
+        >
+          <option value="">All points</option>
+          <option value="entity_level">Entity-level only</option>
+          <option value="exact">Exact locations only</option>
+        </select>
+      </div>
+
+      {}
+      {onBasemapChange && (
+        <div className="mt-3 border-t border-navy-700 pt-3">
+          <label className="mb-1 block text-xs text-steel-300">Basemap</label>
+          <div className="grid grid-cols-2 gap-1 rounded-md border border-navy-600 bg-navy-800 p-1">
+            <button
+              onClick={() => onBasemapChange('dark')}
+              className={`rounded px-2 py-1 text-xs font-semibold transition-colors ${
+                basemap === 'dark'
+                  ? 'bg-radar-500/20 text-radar-300'
+                  : 'text-steel-400 hover:text-steel-200'
+              }`}
+            >
+              Dark
+            </button>
+            <button
+              onClick={() => onBasemapChange('detailed')}
+              className={`rounded px-2 py-1 text-xs font-semibold transition-colors ${
+                basemap === 'detailed'
+                  ? 'bg-radar-500/20 text-radar-300'
+                  : 'text-steel-400 hover:text-steel-200'
+              }`}
+              title="Shows business names and points of interest"
+            >
+              Detailed
+            </button>
+          </div>
+        </div>
+      )}
+
+      {}
+      {onToggleCommunity && (
+        <div className="mt-3 border-t border-navy-700 pt-3">
+          <label className="flex cursor-pointer items-start gap-2">
+            <input
+              type="checkbox"
+              checked={communityLayerOn}
+              onChange={(e) => onToggleCommunity(e.target.checked)}
+              className="mt-0.5 h-3.5 w-3.5 accent-[#20b8c8]"
+            />
+            <span className="text-xs leading-tight text-steel-200">
+              <span className="font-medium text-steel-100">Community Reported Cameras</span>
+              <span className="mt-0.5 block text-[11px] text-steel-400">
+                {communityLoading
+                  ? 'Loading cameras…'
+                  : 'Community reported, unverified.'}
+              </span>
+            </span>
+          </label>
+          {communityLayerOn && (
+            <div className="mt-2 space-y-2">
+              <p className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 text-[11px] leading-snug text-amber-400">
+                Community reported. Unverified.
+              </p>
+              <a
+                href="/submit"
+                className="block rounded-lg border border-navy-600 bg-navy-800 px-3 py-2 text-center text-xs font-semibold text-steel-100 transition-colors hover:border-radar-500/50 hover:bg-navy-700"
+              >
+                Report a camera
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
