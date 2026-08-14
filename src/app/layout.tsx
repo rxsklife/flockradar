@@ -55,11 +55,20 @@ export const metadata: Metadata = {
     url: 'https://flockradar.com',
     siteName: 'FlockRadar',
     locale: 'en_US',
+    images: [
+      {
+        url: 'https://flockradar.com/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'FlockRadar map of disclosed license plate reader deployments',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'FlockRadar: Open-Source ALPR Transparency Map',
     description: 'Every marker is evidence-backed, status-labeled, source-linked, and time-bounded.',
+    images: ['https://flockradar.com/og-image.png'],
   },
   metadataBase: new URL('https://flockradar.com'),
   robots: {
