@@ -32,7 +32,7 @@ Other projects track these cameras. DeFlock and the EFF Atlas of Surveillance do
 
 ## See It Work
 
-![FlockRadar homepage](docs/homepage.png)
+![FlockRadar map of disclosed license plate reader cameras](docs/homepage.png)
 
 The live feed and stats are real endpoints. Try them:
 
