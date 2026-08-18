@@ -8,11 +8,20 @@ interface RoutePoint {
   lng: number;
 }
 
+interface ValhallaManeuver {
+  instruction: string;
+  length: number;
+  time: number;
+  type: number;
+  begin_shape_index: number;
+}
+
 interface RouteResult {
   geometry: [number, number][];
   distanceM: number;
   durationS: number;
   cameraHits: { lat: number; lng: number; distM: number }[];
+  maneuvers: ValhallaManeuver[];
 }
 
 interface PrivacyRouteProps {
@@ -90,6 +99,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RouteResult | null>(null);
+  const [savingPhoto, setSavingPhoto] = useState(false);
   const [candidateCount, setCandidateCount] = useState(0);
   const layerRef = useRef<L.LayerGroup | null>(null);
   const camerasRef = useRef<[number, number][] | null>(null);
@@ -204,7 +214,12 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
 
       const valhallaRoute = async (
         excludePolys: number[][][],
-      ): Promise<{ geometry: [number, number][]; distance: number; duration: number }> => {
+      ): Promise<{
+        geometry: [number, number][];
+        distance: number;
+        duration: number;
+        maneuvers: ValhallaManeuver[];
+      }> => {
         const payload = {
           locations: [
             { lat: start.lat, lon: start.lng },
@@ -218,15 +233,22 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
-        })) as { trip?: { legs: { shape: string }[]; summary: { length: number; time: number } } };
+        })) as {
+          trip?: {
+            legs: { shape: string; maneuvers?: ValhallaManeuver[] }[];
+            summary: { length: number; time: number };
+          };
+        };
         if (!res.trip?.legs?.length) throw new Error('No route found between these points.');
 
         const shape = res.trip.legs.map((l) => l.shape).join('');
         const coords = decodePolyline(shape);
+        const maneuvers = res.trip.legs.flatMap((l) => l.maneuvers ?? []);
         return {
           geometry: coords,
           distance: res.trip.summary.length * 1000,
           duration: res.trip.summary.time,
+          maneuvers,
         };
       };
 
@@ -332,6 +354,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
         distanceM: Math.round(route.distance),
         durationS: Math.round(route.duration),
         cameraHits,
+        maneuvers: route.maneuvers,
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Route failed. Try different locations.');
@@ -369,6 +392,52 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
     );
   }, []);
 
+  const exportDirections = useCallback(() => {
+    if (!result) return;
+    const lines = [
+      'PRIVACY ROUTE',
+      `From: ${from}  To: ${to}`,
+      `${fmtDist(result.distanceM)} · ${fmtDur(result.durationS)} drive`,
+      `Cameras within 120m: ${result.cameraHits.length}`,
+      '',
+      ...result.maneuvers.map(
+        (mv, i) => `${i + 1}. ${mv.instruction} (${fmtDist(Math.round(mv.length * 1000))})`,
+      ),
+      '',
+      'Route computed with Valhalla routing (OpenStreetMap). Red circles mark camera exposure zones.',
+    ];
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'privacy-route.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [result, from, to]);
+
+  const saveRoutePhoto = useCallback(async () => {
+    if (!map) return;
+    setSavingPhoto(true);
+    setError(null);
+    try {
+      const { default: html2canvas } = await import('html2canvas');
+      const canvas = await html2canvas(map.getContainer(), {
+        useCORS: true,
+        backgroundColor: '#0a1622',
+        scale: 2,
+      });
+      const url = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'privacy-route.png';
+      a.click();
+    } catch {
+      setError('Could not capture the map photo. Try again.');
+    } finally {
+      setSavingPhoto(false);
+    }
+  }, [map]);
+
   return (
     <div className="absolute left-1/2 top-[4.5rem] z-[1000] w-72 -translate-x-1/2 sm:left-4 sm:top-24 sm:w-80 sm:translate-x-0">
       <button
@@ -376,7 +445,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
           setOpen((v) => !v);
           if (open) clearRoute();
         }}
-        className="w-full rounded-lg border border-navy-600 bg-navy-900 px-4 py-2.5 text-center text-sm font-medium text-steel-100 shadow-sm transition-colors hover:border-radar-500/50"
+        className="w-full rounded-lg border border-navy-500/40 bg-navy-900/60 px-4 py-2.5 text-center text-sm font-medium text-steel-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:border-radar-500/50"
       >
         <span className="flex items-center justify-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element -- small inline icon */}
@@ -470,6 +539,21 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
               {result.cameraHits.length > 0 && (
                 <p className="text-steel-400">Red circles mark camera exposure zones.</p>
               )}
+              <div className="flex gap-1.5 pt-0.5">
+                <button
+                  onClick={saveRoutePhoto}
+                  disabled={savingPhoto}
+                  className="flex-1 rounded-md border border-navy-600 px-2 py-1 text-[11px] text-steel-300 transition-colors hover:border-radar-500/50 hover:text-radar-300 disabled:opacity-50"
+                >
+                  {savingPhoto ? 'Capturing…' : 'Save route photo'}
+                </button>
+                <button
+                  onClick={exportDirections}
+                  className="flex-1 rounded-md border border-navy-600 px-2 py-1 text-[11px] text-steel-300 transition-colors hover:border-radar-500/50 hover:text-radar-300"
+                >
+                  Directions (.txt)
+                </button>
+              </div>
               <button
                 onClick={clearRoute}
                 className="mt-1 w-full rounded-md border border-navy-600 px-2 py-1 text-[11px] text-steel-400 transition-colors hover:bg-navy-800"

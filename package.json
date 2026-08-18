@@ -16,6 +16,7 @@
   "dependencies": {
     "drizzle-orm": "^0.45.2",
     "dseg": "^0.46.0",
+    "html2canvas": "^1.4.1",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "next": "16.3.0",
