@@ -108,15 +108,14 @@ export default function LiveFeed() {
 
   return (
     <section className="sticky top-[63px] z-30 overflow-hidden border-y border-navy-700/70 bg-navy-950/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:gap-5 sm:px-6 sm:py-3 lg:px-8">
+      <div className="flex items-center gap-3 px-4 py-2.5 sm:gap-5 sm:px-6 sm:py-3 lg:px-8">
         <div className="flex shrink-0 items-center gap-2">
           <span
             className={`hud-led ${fresh ? 'hud-led-ok' : 'hud-led-warn'}`}
             aria-hidden="true"
           />
           <p className="mono-data text-[9px] uppercase tracking-[0.18em] text-steel-300 sm:text-[10px]">
-            {fresh ? 'LIVE FEED' : 'CURATED FEED'}
-            <span className="text-steel-500">{' // ALPR WATCH:'}</span>
+            {fresh ? 'LIVE FEED:' : 'CURATED FEED:'}
           </p>
         </div>
 
