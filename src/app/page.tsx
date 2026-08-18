@@ -519,14 +519,14 @@ export default async function HomePage() {
           src="/bg-cta.jpg"
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover object-right opacity-45"
+          className="absolute inset-y-0 left-0 h-full w-full object-cover object-right-top opacity-45 sm:w-1/2"
           width={2048}
           height={1152}
           draggable={false}
         />
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-b from-navy-950 via-navy-950/70 to-navy-950"
+          className="absolute inset-0 bg-gradient-to-r from-navy-950/70 via-navy-950/30 to-navy-950 sm:from-navy-950/80 sm:via-navy-950/40 sm:to-navy-950"
         />
         <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <Reveal>
