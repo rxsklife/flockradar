@@ -109,7 +109,7 @@ export default function TutorialHint() {
         </div>
       ) : (
 
-        <div className="pointer-events-auto absolute bottom-24 left-4 right-4 flex items-center gap-2 rounded-lg border border-navy-600 bg-navy-900/95 shadow-lg">
+        <div className="pointer-events-auto absolute bottom-32 left-4 right-4 flex items-center gap-2 rounded-lg border border-navy-600 bg-navy-900/95 shadow-lg">
           <button
             onClick={() => setExpanded(true)}
             className="flex flex-1 items-center gap-2 px-3 py-2.5 text-left transition-colors hover:text-radar-300"
