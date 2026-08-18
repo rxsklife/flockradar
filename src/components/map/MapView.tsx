@@ -227,7 +227,7 @@ function communityCameraPopupHtml(
       <p class="community-popup-title" style="margin:0 0 6px;font-weight:600;font-size:13px;color:#e6f0fa;">Community Reported Camera</p>
       ${
         address
-          ? `<a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:block;margin:0 0 4px;font-size:12px;color:#20b8c8;text-decoration:none;line-height:1.4;" title="Open in Street View">${escapeHtml(address)}</a>`
+          ? `<a href="${mapsUrl}" onclick="window.__flockOpenStreetView(${lat},${lng});return false;" style="display:block;margin:0 0 4px;font-size:12px;color:#20b8c8;text-decoration:none;line-height:1.4;cursor:pointer;" title="Open in Street View">${escapeHtml(address)}</a>`
           : `<p style="margin:0 0 4px;font-size:12px;color:#8fa3b8;">Looking up address…</p>`
       }
       <p class="community-popup-coords" style="margin:0 0 2px;font-size:12px;color:#8fa3b8;font-family:monospace;">
@@ -238,9 +238,8 @@ function communityCameraPopupHtml(
       </p>
       <a
         href="${mapsUrl}"
-        target="_blank"
-        rel="noopener noreferrer"
-        style="display:block;text-align:center;padding:6px 10px;border-radius:6px;background:#20b8c8;color:#0f1f30;font-weight:600;font-size:12px;text-decoration:none;"
+        onclick="window.__flockOpenStreetView(${lat},${lng});return false;"
+        style="display:block;text-align:center;padding:6px 10px;border-radius:6px;background:#20b8c8;color:#0f1f30;font-weight:600;font-size:12px;text-decoration:none;cursor:pointer;"
       >
         Open in Street View ↗
       </a>
@@ -309,6 +308,7 @@ export default function MapView() {
 
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const userLocationRef = useRef<[number, number] | null>(null);
+  const [streetView, setStreetView] = useState<{ lat: number; lng: number } | null>(null);
 
   const pendingLocRef = useRef<[number, number] | null>(null);
   const pendingAccRef = useRef(40);
@@ -722,6 +722,24 @@ export default function MapView() {
   );
 
   useEffect(() => {
+    const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
+    (window as unknown as { __flockOpenStreetView?: (lat: number, lng: number) => void }).__flockOpenStreetView = (
+      lat: number,
+      lng: number,
+    ) => {
+      if (key) {
+        setStreetView({ lat, lng });
+      } else {
+        window.open(
+          `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`,
+          '_blank',
+          'noopener',
+        );
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!('geolocation' in navigator) || !('permissions' in navigator)) return;
     let cancelled = false;
     navigator.permissions
@@ -961,26 +979,55 @@ export default function MapView() {
 
       <button
         onClick={() => setShowMobileFilters((v) => !v)}
-        className="absolute bottom-4 left-4 z-[1000] rounded-lg bg-navy-900 px-4 py-2 text-sm font-semibold text-steel-100 shadow-lg ring-1 ring-navy-600 sm:hidden"
+        className="absolute bottom-4 left-4 z-[1000] rounded-lg border border-navy-500/40 bg-navy-900/60 px-4 py-2 text-sm font-semibold text-steel-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:bg-navy-900/80 sm:hidden"
         aria-label="Toggle filters"
       >
         {showMobileFilters ? 'Close' : 'Filters'}
       </button>
 
-      {markerCount !== null && (
-        <div className="absolute left-1/2 top-4 z-[1000] flex -translate-x-1/2 items-center gap-2 rounded-lg bg-navy-950/90 px-3 py-1.5 ring-1 ring-navy-600">
-          <div className="text-center">
-            <p className="flex items-center justify-center gap-1.5 text-xs font-medium text-steel-300">
-              <span className="live-ping shrink-0" aria-hidden="true" />
-              {(markerCount + (communityOn && communityTotal ? communityTotal : 0)).toLocaleString()}{' '}
-              {(markerCount + (communityOn && communityTotal ? communityTotal : 0)) === 1 ? 'marker' : 'markers'}
-            </p>
-            {communityOn && communityTotal && (
-              <p className="mt-0.5 text-[10px] leading-tight text-steel-400">
-                {markerCount.toLocaleString()} verified · {communityTotal.toLocaleString()} community submitted
+      {streetView && (
+        <div
+          className="fixed inset-0 z-[2000] flex items-center justify-center bg-navy-950/90 p-4"
+          onClick={() => setStreetView(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Street View"
+        >
+          <div
+            className="relative w-full max-w-3xl overflow-hidden rounded-xl border border-navy-500/40 bg-navy-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_20px_60px_rgba(2,8,16,0.6)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-navy-700 px-4 py-2">
+              <p className="mono-data text-[10px] uppercase tracking-[0.18em] text-steel-300">
+                Street View
               </p>
-            )}
+              <button
+                onClick={() => setStreetView(null)}
+                className="rounded px-2 py-0.5 text-xs text-steel-400 transition-colors hover:text-steel-100"
+                aria-label="Close Street View"
+              >
+                Close
+              </button>
+            </div>
+            <iframe
+              src={`https://www.google.com/maps/embed/v1/streetview?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&location=${streetView.lat},${streetView.lng}`}
+              className="h-[60vh] w-full"
+              allowFullScreen
+              loading="lazy"
+              title="Street View of the location"
+            />
           </div>
+        </div>
+      )}
+
+      {markerCount !== null && (
+        <div className="absolute left-1/2 top-4 z-[1000] flex -translate-x-1/2 items-center gap-1.5 rounded-md border border-navy-500/40 bg-navy-900/60 px-2.5 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-md backdrop-saturate-150">
+          <span className="live-ping shrink-0" aria-hidden="true" />
+          <p className="whitespace-nowrap text-[10px] font-medium text-steel-300">
+            {(markerCount + (communityOn && communityTotal ? communityTotal : 0)).toLocaleString()}{' '}
+            {(markerCount + (communityOn && communityTotal ? communityTotal : 0)) === 1 ? 'marker' : 'markers'}
+            {communityOn && communityTotal ? ` · ${communityTotal.toLocaleString()} community` : ''}
+          </p>
         </div>
       )}
 
@@ -1017,7 +1064,19 @@ export default function MapView() {
       <Legend />
 
       {showMobileFilters && (
-        <div className="absolute inset-x-0 bottom-16 z-[1000] mx-4 rounded-lg border border-navy-600 bg-navy-900 p-3 shadow-lg sm:hidden">
+        <div className="absolute inset-x-0 bottom-16 z-[1000] mx-4 max-h-[55vh] overflow-y-auto rounded-lg border border-navy-500/40 bg-navy-900/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 sm:hidden">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="mono-data text-[10px] uppercase tracking-[0.18em] text-steel-400">
+              Filter deployments
+            </p>
+            <button
+              onClick={() => setShowMobileFilters(false)}
+              className="rounded px-2 py-0.5 text-xs text-steel-400 transition-colors hover:text-steel-100"
+              aria-label="Close filters"
+            >
+              Close
+            </button>
+          </div>
           <FilterBar
             filters={filters}
             onChange={handleMobileFilterChange}
@@ -1039,7 +1098,7 @@ export default function MapView() {
 
             if (m && userLocation) m.setView(userLocation, 17, { animate: false });
           }}
-          className="absolute bottom-20 left-4 z-[1000] flex h-11 w-11 items-center justify-center rounded-full border border-navy-600 bg-navy-900 text-radar-400 shadow-lg transition-colors hover:bg-navy-800 hover:text-radar-300 sm:bottom-4"
+          className="absolute bottom-20 left-4 z-[1000] flex h-11 w-11 items-center justify-center rounded-full border border-navy-500/40 bg-navy-900/60 text-radar-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:bg-navy-900/80 hover:text-radar-300 sm:bottom-4"
           aria-label="Snap back to my location"
           title="Back to my location"
         >
@@ -1094,7 +1153,7 @@ function popupHtml(
     rows.push(`<p class="popup-address-line">No street address found for these coordinates.</p>`);
   }
   rows.push(`</div>`);
-  rows.push(`<a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="popup-streetview">Open in Street View ↗</a>`);
+  rows.push(`<a href="${mapsUrl}" onclick="window.__flockOpenStreetView(${lat},${lng});return false;" class="popup-streetview">Open in Street View ↗</a>`);
   rows.push(`<div class="popup-footer"><a href="/correct">Report a correction</a></div>`);
   rows.push(`</div>`);
   return rows.join('');

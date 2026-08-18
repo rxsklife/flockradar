@@ -51,7 +51,7 @@ export default function FilterBar({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="absolute right-4 top-4 z-[1000] hidden items-center gap-1.5 rounded-lg border border-navy-600 bg-navy-900 px-3 py-2 text-xs font-semibold text-steel-200 shadow-lg transition-colors hover:bg-navy-800 sm:flex"
+        className="absolute right-4 top-4 z-[1000] hidden items-center gap-1.5 rounded-lg border border-navy-500/40 bg-navy-900/60 px-3 py-2 text-xs font-semibold text-steel-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:bg-navy-900/80 sm:flex"
         aria-label="Open filters"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -67,7 +67,7 @@ export default function FilterBar({
       className={
         isMobile
           ? 'w-full'
-          : 'absolute right-4 top-4 z-[1000] hidden w-56 rounded-lg border border-navy-600 bg-navy-900 p-3 shadow-lg sm:block'
+          : 'absolute right-4 top-4 z-[1000] hidden w-56 rounded-lg border border-navy-500/40 bg-navy-900/60 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 sm:block'
       }
     >
       <div className="mb-2 flex items-center justify-between">
