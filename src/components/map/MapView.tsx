@@ -1058,7 +1058,7 @@ export default function MapView() {
             </p>
             <button
               onClick={() => setShowMobileFilters(false)}
-              className="hud-chip px-3 py-1.5 text-xs"
+              className="rounded px-2.5 py-1.5 text-xs font-medium text-steel-300 transition-colors hover:bg-navy-800 hover:text-steel-100"
               aria-label="Close filters"
             >
               Close
