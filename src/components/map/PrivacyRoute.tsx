@@ -439,7 +439,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
   }, [map]);
 
   return (
-    <div className="absolute left-1/2 top-4 z-[1000] -translate-x-1/2 sm:left-4 sm:top-24 sm:translate-x-0">
+    <div className="absolute left-1/2 top-4 z-[1000] flex -translate-x-1/2 flex-col items-center sm:left-4 sm:top-24 sm:translate-x-0 sm:items-start">
       <button
         onClick={() => {
           setOpen((v) => !v);
