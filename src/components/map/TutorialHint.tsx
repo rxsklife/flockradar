@@ -2,16 +2,10 @@
 
 import { useEffect, useState } from 'react';
 
-const TUTORIAL_KEY = 'flockradar-tutorial-v1';
-
 export default function TutorialHint() {
-
 
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches,
-  );
-  const [dismissed, setDismissed] = useState(
-    () => typeof window !== 'undefined' && !!window.localStorage.getItem(TUTORIAL_KEY),
   );
   const [expanded, setExpanded] = useState(false);
 
@@ -22,16 +16,9 @@ export default function TutorialHint() {
     return () => mq.removeEventListener('change', onChange);
   }, []);
 
-  if (!isMobile || dismissed) return null;
+  if (!isMobile) return null;
 
-  const done = () => {
-    try {
-      localStorage.setItem(TUTORIAL_KEY, '1');
-    } catch {
-
-    }
-    setDismissed(true);
-  };
+  const done = () => setExpanded(false);
 
   return (
 
