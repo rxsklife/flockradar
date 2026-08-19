@@ -439,7 +439,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
   }, [map]);
 
   return (
-    <div className="absolute left-1/2 top-[4.5rem] z-[1000] w-72 -translate-x-1/2 sm:left-4 sm:top-24 sm:w-80 sm:translate-x-0">
+    <div className="absolute left-1/2 top-4 z-[1000] w-72 -translate-x-1/2 sm:left-4 sm:top-24 sm:w-80 sm:translate-x-0">
       <button
         onClick={() => {
           setOpen((v) => !v);
@@ -457,7 +457,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
           />
           Privacy Route
         </span>
-        <span className="block text-[11px] font-normal text-steel-400">
+        <span className="hidden text-[11px] font-normal text-steel-400 sm:block">
           Tap to find a drive that avoids Flock cameras
         </span>
       </button>

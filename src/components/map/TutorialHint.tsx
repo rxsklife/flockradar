@@ -41,16 +41,16 @@ export default function TutorialHint() {
 
 
         <div
-          className="pointer-events-auto absolute inset-0 flex items-center justify-center bg-navy-950/90 p-4"
+          className="pointer-events-auto absolute inset-0 flex items-center justify-center overflow-y-auto bg-navy-950/90 p-4"
           onClick={done}
         >
           <div
-            className="tutorial-card w-full max-w-sm rounded-xl border border-navy-600 bg-navy-900 p-5 shadow-2xl"
+            className="tutorial-card my-auto w-full max-w-sm rounded-xl border border-navy-500/40 bg-navy-900/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-base font-bold text-steel-100">Welcome to FlockRadar</h2>
             <p className="mt-1 text-xs text-steel-400">A few quick tips before you explore:</p>
-            <ul className="mt-3 space-y-3">
+            <ul className="mt-3 space-y-2">
               <li className="flex gap-3">
                 <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#20b8c8] text-[10px] font-bold text-navy-950">
                   12

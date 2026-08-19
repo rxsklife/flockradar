@@ -293,7 +293,6 @@ export default function MapView() {
   const [filters, setFilters] = useState<Filters>({});
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [markerCount, setMarkerCount] = useState<number | null>(null);
-  const [communityTotal, setCommunityTotal] = useState<number | null>(null);
   const [communityOn, setCommunityOn] = useState(true);
   const [communityLoading, setCommunityLoading] = useState(false);
   const [mapReady, setMapReady] = useState(false);
@@ -454,7 +453,6 @@ export default function MapView() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: [number, number, number | null][] = await res.json();
         if (data.length === 0) return;
-        setCommunityTotal(data.length);
 
 
 
@@ -1020,17 +1018,6 @@ export default function MapView() {
         </div>
       )}
 
-      {markerCount !== null && (
-        <div className="absolute left-1/2 top-4 z-[1000] flex -translate-x-1/2 items-center gap-1.5 rounded-md border border-navy-500/40 bg-navy-900/60 px-2.5 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-md backdrop-saturate-150">
-          <span className="live-ping shrink-0" aria-hidden="true" />
-          <p className="whitespace-nowrap text-[10px] font-medium text-steel-300">
-            {(markerCount + (communityOn && communityTotal ? communityTotal : 0)).toLocaleString()}{' '}
-            {(markerCount + (communityOn && communityTotal ? communityTotal : 0)) === 1 ? 'marker' : 'markers'}
-            {communityOn && communityTotal ? ` · ${communityTotal.toLocaleString()} community` : ''}
-          </p>
-        </div>
-      )}
-
       {markerCount === 0 && (
         <div className="absolute inset-0 z-[1000] flex items-center justify-center">
           <div className="mx-4 max-w-sm rounded-lg bg-navy-900/95 p-6 text-center shadow-lg ring-1 ring-navy-600">
@@ -1064,7 +1051,7 @@ export default function MapView() {
       <Legend />
 
       {showMobileFilters && (
-        <div className="absolute inset-x-0 bottom-16 z-[1000] mx-4 max-h-[55vh] overflow-y-auto rounded-lg border border-navy-500/40 bg-navy-900/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 sm:hidden">
+        <div className="absolute inset-x-0 bottom-16 z-[1000] mx-4 rounded-lg border border-navy-500/40 bg-navy-900/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 sm:hidden">
           <div className="mb-2 flex items-center justify-between">
             <p className="mono-data text-[10px] uppercase tracking-[0.18em] text-steel-400">
               Filter deployments
