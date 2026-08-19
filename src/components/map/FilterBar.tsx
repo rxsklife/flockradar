@@ -70,7 +70,7 @@ export default function FilterBar({
           : 'hud-panel absolute right-4 top-4 z-[1000] hidden! w-56 p-3 sm:block!'
       }
     >
-      <div className="mb-2 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between pr-1">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-steel-400">
           Filters
         </h3>

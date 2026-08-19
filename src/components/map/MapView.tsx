@@ -1051,29 +1051,31 @@ export default function MapView() {
       <Legend />
 
       {showMobileFilters && (
-        <div className="hud-panel absolute inset-x-0 bottom-16 z-[1000] mx-4 p-3 sm:hidden!">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="mono-data text-[10px] uppercase tracking-[0.18em] text-steel-400">
+        <div className="fixed inset-0 z-[1100] flex flex-col bg-navy-950/95 backdrop-blur-md sm:hidden!">
+          <div className="flex shrink-0 items-center justify-between border-b border-navy-700/70 px-4 py-3">
+            <p className="mono-data text-[10px] uppercase tracking-[0.18em] text-steel-300">
               Filter deployments
             </p>
             <button
               onClick={() => setShowMobileFilters(false)}
-              className="rounded px-2 py-0.5 text-xs text-steel-400 transition-colors hover:text-steel-100"
+              className="hud-chip px-3 py-1.5 text-xs"
               aria-label="Close filters"
             >
               Close
             </button>
           </div>
-          <FilterBar
-            filters={filters}
-            onChange={handleMobileFilterChange}
-            variant="mobile"
-            communityLayerOn={communityOn}
-            onToggleCommunity={toggleCommunityLayer}
-            communityLoading={communityLoading}
-            basemap={basemap}
-            onBasemapChange={handleBasemapChange}
-          />
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <FilterBar
+              filters={filters}
+              onChange={handleMobileFilterChange}
+              variant="mobile"
+              communityLayerOn={communityOn}
+              onToggleCommunity={toggleCommunityLayer}
+              communityLoading={communityLoading}
+              basemap={basemap}
+              onBasemapChange={handleBasemapChange}
+            />
+          </div>
         </div>
       )}
 
