@@ -387,6 +387,47 @@ select optgroup {
   }
 }
 
+.hud-chip,
+.hud-panel {
+  position: relative;
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 11px) 0,
+    100% 11px,
+    100% 100%,
+    11px 100%,
+    0 calc(100% - 11px)
+  );
+}
+.hud-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(148, 184, 214, 0.08);
+  border: 1px solid rgba(148, 184, 214, 0.35);
+  color: #d7e0e9;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+.hud-chip:hover {
+  background: rgba(32, 184, 200, 0.16);
+  border-color: rgba(95, 224, 236, 0.45);
+  color: #d7f3f7;
+}
+.hud-panel {
+  background: rgba(10, 22, 34, 0.82);
+  border: 1px solid rgba(95, 224, 236, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 10px 30px rgba(2, 8, 16, 0.5);
+}
+
 .btn-primary,
 .btn-secondary {
   position: relative;

@@ -439,31 +439,28 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
   }, [map]);
 
   return (
-    <div className="absolute left-1/2 top-4 z-[1000] w-72 -translate-x-1/2 sm:left-4 sm:top-24 sm:w-80 sm:translate-x-0">
+    <div className="absolute left-1/2 top-4 z-[1000] -translate-x-1/2 sm:left-4 sm:top-24 sm:translate-x-0">
       <button
         onClick={() => {
           setOpen((v) => !v);
           if (open) clearRoute();
         }}
-        className="w-full rounded-lg border border-navy-500/40 bg-navy-900/60 px-4 py-2.5 text-center text-sm font-medium text-steel-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:border-radar-500/50"
+        className="hud-chip px-4 py-2 text-sm"
       >
         <span className="flex items-center justify-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element -- small inline icon */}
           <img
             src="/privacy-shield-white.png"
             alt=""
-            className="h-5 w-5"
+            className="h-4 w-4"
             draggable={false}
           />
           Privacy Route
         </span>
-        <span className="hidden text-[11px] font-normal text-steel-400 sm:block">
-          Tap to find a drive that avoids Flock cameras
-        </span>
       </button>
 
       {open && (
-        <div className="mt-1 space-y-2 rounded-lg border border-navy-600 bg-navy-900 p-3 shadow-lg">
+        <div className="hud-panel mt-1 w-72 space-y-2 p-3 sm:w-80">
           <div className="relative">
             <input
               type="text"

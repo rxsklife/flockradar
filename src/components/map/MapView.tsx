@@ -977,7 +977,7 @@ export default function MapView() {
 
       <button
         onClick={() => setShowMobileFilters((v) => !v)}
-        className="absolute bottom-4 left-4 z-[1000] rounded-lg border border-navy-500/40 bg-navy-900/60 px-4 py-2 text-sm font-semibold text-steel-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:bg-navy-900/80 sm:hidden"
+        className="hud-chip absolute bottom-4 left-4 z-[1000] px-4 py-2 text-sm font-semibold sm:hidden!"
         aria-label="Toggle filters"
       >
         {showMobileFilters ? 'Close' : 'Filters'}
@@ -1051,7 +1051,7 @@ export default function MapView() {
       <Legend />
 
       {showMobileFilters && (
-        <div className="absolute inset-x-0 bottom-16 z-[1000] mx-4 rounded-lg border border-navy-500/40 bg-navy-900/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 sm:hidden">
+        <div className="hud-panel absolute inset-x-0 bottom-16 z-[1000] mx-4 p-3 sm:hidden!">
           <div className="mb-2 flex items-center justify-between">
             <p className="mono-data text-[10px] uppercase tracking-[0.18em] text-steel-400">
               Filter deployments
