@@ -112,7 +112,7 @@ export default function TutorialHint() {
           onClick={() => setExpanded(true)}
           aria-label="Open map tips"
           title="Map tips"
-          className="pointer-events-auto absolute bottom-24 right-4 z-[1000] flex h-9 w-9 items-center justify-center rounded-[4px] border border-navy-500/40 bg-navy-900/60 text-base font-bold text-radar-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:bg-radar-500/20 hover:text-white sm:bottom-64"
+          className="pointer-events-auto absolute bottom-24 right-[10px] z-[1000] flex h-8 w-8 items-center justify-center rounded-[4px] border border-navy-500/40 bg-navy-900/60 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:bg-radar-500/20 sm:bottom-64"
         >
           ?
         </button>
