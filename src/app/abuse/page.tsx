@@ -46,8 +46,6 @@ export default async function AbusePage() {
 
   // eslint-disable-next-line react-hooks/purity -- request-time value on a force-dynamic page
   const todayTs = Date.now();
-
-  // eslint-disable-next-line react-hooks/purity -- calendar boundaries computed per request
   const d = new Date(todayTs);
   const y = d.getUTCFullYear();
   const m = d.getUTCMonth();
