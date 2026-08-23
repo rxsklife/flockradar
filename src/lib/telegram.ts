@@ -1,7 +1,7 @@
 
 
 export interface ReviewItem {
-  kind: 'tip' | 'correction';
+  kind: 'tip' | 'correction' | 'lead' | 'abuse';
   id: string;
   title: string;
   summary: string;
@@ -38,7 +38,9 @@ async function tgFetch(method: string, payload: Record<string, unknown>): Promis
 }
 
 export function shortRef(kind: ReviewItem['kind'], id: string): string {
-  return `${kind === 'tip' ? 'TIP' : 'COR'}-${id.slice(0, 4).toUpperCase()}`;
+  const prefix =
+    kind === 'tip' ? 'TIP' : kind === 'correction' ? 'COR' : kind === 'lead' ? 'LEAD' : 'ABU';
+  return `${prefix}-${id.slice(0, 4).toUpperCase()}`;
 }
 
 export function buildReviewPrompt(item: ReviewItem): string {
@@ -46,7 +48,11 @@ export function buildReviewPrompt(item: ReviewItem): string {
   const lines = [
     item.kind === 'tip'
       ? `\u{1F9ED} NEW TIP ${ref}`
-      : `\u270F\uFE0F NEW CORRECTION ${ref}`,
+      : item.kind === 'correction'
+        ? `\u270F\uFE0F NEW CORRECTION ${ref}`
+        : item.kind === 'lead'
+          ? `\u{1F50D} NEW LEAD ${ref}`
+          : `\u26A0\uFE0F NEW ABUSE CASE ${ref}`,
     `\u{1F3E2} ${item.title}`,
     `\u{1F4DD} ${item.summary.slice(0, 280)}`,
   ];

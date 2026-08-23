@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { submissions, corrections, changelog } from '@/db/schema';
+import { submissions, corrections, changelog, leads, abuseCases } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import {
   answerCallback,
@@ -11,7 +11,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-type Kind = 'tip' | 'correction';
+type Kind = 'tip' | 'correction' | 'lead' | 'abuse';
 
 const OUTCOME_TEXT: Record<'approved' | 'denied', string> = {
   approved: '\u2705 Approved',
@@ -48,6 +48,34 @@ async function findItem(kind: Kind, id: string) {
       contactEmail: row.contactEmail,
     };
   }
+  if (kind === 'lead') {
+    const [row] = await db
+      .select()
+      .from(leads)
+      .where(eq(leads.id, id))
+      .limit(1);
+    if (!row) return null;
+    return {
+      title: row.title,
+      summary: row.summary || '(no summary)',
+      sourceUrl: row.url,
+      contactEmail: null,
+    };
+  }
+  if (kind === 'abuse') {
+    const [row] = await db
+      .select()
+      .from(abuseCases)
+      .where(eq(abuseCases.id, id))
+      .limit(1);
+    if (!row) return null;
+    return {
+      title: row.title,
+      summary: row.summary || '(no summary)',
+      sourceUrl: row.url,
+      contactEmail: null,
+    };
+  }
   const [row] = await db
     .select()
     .from(corrections)
@@ -63,7 +91,14 @@ async function findItem(kind: Kind, id: string) {
 }
 
 async function applyDecision(kind: Kind, id: string, approve: boolean) {
-  const table = kind === 'tip' ? submissions : corrections;
+  const table =
+    kind === 'tip'
+      ? submissions
+      : kind === 'correction'
+        ? corrections
+        : kind === 'lead'
+          ? leads
+          : abuseCases;
   const status = approve ? 'accepted' : 'rejected';
   const [row] = await db
     .update(table)
@@ -77,11 +112,15 @@ async function applyDecision(kind: Kind, id: string, approve: boolean) {
     const item = await findItem(kind, id);
     await db.insert(changelog).values({
       entityName: item?.title ?? 'Community submission',
-      action: kind === 'tip' ? 'created' : 'corrected',
+      action: kind === 'correction' ? 'corrected' : 'created',
       description:
         kind === 'tip'
           ? `Community tip approved and published (${shortRef(kind, id)}).`
-          : `Correction approved and applied (${shortRef(kind, id)}).`,
+          : kind === 'correction'
+            ? `Correction approved and applied (${shortRef(kind, id)}).`
+            : kind === 'lead'
+              ? `New deployment lead approved and published (${shortRef(kind, id)}).`
+              : `New abuse case approved and published (${shortRef(kind, id)}).`,
       sourceUrl: item?.sourceUrl ?? null,
     });
   }
@@ -95,13 +134,13 @@ async function handleCallback(cq: NonNullable<TelegramUpdate['callback_query']>)
     await answerCallback(cq.id, 'Unknown sender');
     return;
   }
-  const match = /^(approve|deny):(tip|correction):([0-9a-f-]+)$/.exec(cq.data ?? '');
+  const match = /^(approve|deny):(tip|correction|lead|abuse):([0-9a-f-]+)$/.exec(cq.data ?? '');
   if (!match) {
     await answerCallback(cq.id, 'Unrecognized action');
     return;
   }
   const [, action, rawKind, id] = match;
-  const kind: Kind = rawKind === 'correction' ? 'correction' : 'tip';
+  const kind: Kind = rawKind === 'tip' ? 'tip' : rawKind === 'correction' ? 'correction' : rawKind === 'lead' ? 'lead' : 'abuse';
   const approve = action === 'approve';
 
   await answerCallback(cq.id, approve ? 'Approving\u2026' : 'Denying\u2026');
