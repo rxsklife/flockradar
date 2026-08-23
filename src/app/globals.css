@@ -787,13 +787,6 @@ select optgroup {
 
 .ticker-mask {
   overflow: hidden;
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 24px,
-    #000 calc(100% - 24px),
-    transparent 100%
-  );
 }
 
 .ticker-track {
