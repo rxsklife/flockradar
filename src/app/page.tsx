@@ -2,8 +2,8 @@ import Link from 'next/link';
 import fs from 'node:fs';
 import path from 'node:path';
 import { db } from '@/db';
-import { entities, locations, sources } from '@/db/schema';
-import { count, eq, sql } from 'drizzle-orm';
+import { entities, locations, sources, abuseCases } from '@/db/schema';
+import { count, desc, eq, sql } from 'drizzle-orm';
 import Reveal from '@/components/Reveal';
 import CountUp from '@/components/CountUp';
 import LiveFeed from '@/components/LiveFeed';
@@ -85,6 +85,12 @@ export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   const stats = await getStats();
+  const abuseCasesList = await db
+    .select()
+    .from(abuseCases)
+    .where(eq(abuseCases.status, 'approved'))
+    .orderBy(desc(abuseCases.publishedAt))
+    .limit(4);
 
   return (
     <>
@@ -295,101 +301,29 @@ export default async function HomePage() {
               </div>
             </Reveal>
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <Reveal>
-                <div className="hud-card hud-scanlines card-lift h-full rounded-md border border-navy-700 bg-navy-900 p-5 shadow-sm">
-                  <div className="hud-header-strip">
-                    <span className="hud-led hud-led-warn" aria-hidden="true" />
-                    <span className="mono-data">LOG.014 // INSIDER_ABUSE</span>
+              {abuseCasesList.map((c, i) => (
+                <Reveal key={c.id} delay={i * 100}>
+                  <div className="hud-card hud-scanlines card-lift h-full rounded-md border border-navy-700 bg-navy-900 p-5 shadow-sm">
+                    <div className="hud-header-strip">
+                      <span className="hud-led hud-led-warn" aria-hidden="true" />
+                      <span className="mono-data">ABUSE-{c.id.slice(0, 4).toUpperCase()}</span>
+                    </div>
+                    <h4 className="font-semibold text-steel-100">{c.title}</h4>
+                    <p className="mt-2 text-sm leading-6 text-steel-300">{c.summary}</p>
+                    <div className="mt-3 flex flex-wrap gap-3 text-xs">
+                      <a
+                        href={c.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-radar-400 underline decoration-radar-400/40 underline-offset-4 transition-colors hover:text-radar-300"
+                      >
+                        {c.sourceName} report
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
+                      </a>
+                    </div>
                   </div>
-                  <h4 className="font-semibold text-steel-100">Officers stalking romantic interests</h4>
-                  <p className="mt-2 text-sm leading-6 text-steel-300">
-                    A police officer in North Carolina was arrested in August 2026 for using Flock
-                    plate readers 31 times to track her boyfriend&apos;s ex-wife. Her own department
-                    caught her during an audit. Researchers at the Institute for Justice found at
-                    least 14 cases in recent years where officers used plate readers to stalk
-                    romantic interests.
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-3 text-xs">
-                    <a href="https://abcnews.com/US/officer-allegedly-flock-license-plate-cameras-track-boyfriends/story?id=135418955" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-radar-400 underline decoration-radar-400/40 underline-offset-4 transition-colors hover:text-radar-300">
-                      ABC News report
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
-                    </a>
-                    <a href="https://ij.org/police-have-reportedly-used-license-plate-readers-to-stalk-romantic-interests-at-least-14-times-in-recent" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-radar-400 underline decoration-radar-400/40 underline-offset-4 transition-colors hover:text-radar-300">
-                      Institute for Justice research
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
-                    </a>
-                  </div>
-                </div>
-              </Reveal>
-              <Reveal delay={100}>
-                <div className="hud-card hud-scanlines card-lift h-full rounded-md border border-navy-700 bg-navy-900 p-5 shadow-sm">
-                  <div className="hud-header-strip">
-                    <span className="hud-led hud-led-warn" aria-hidden="true" />
-                    <span className="mono-data">LOG.015 // PATTERN_50</span>
-                  </div>
-                  <h4 className="font-semibold text-steel-100">At least 50 officers accused nationwide</h4>
-                  <p className="mt-2 text-sm leading-6 text-steel-300">
-                    Investigations have found at least 50 officers across the country accused of
-                    using Flock&apos;s plate network to stalk people they knew personally. That is a
-                    pattern, not a few bad apples.
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-3 text-xs">
-                    <a href="https://www.techtimes.com/articles/322912/20260804/police-turned-flocks-license-plate-network-stalking-tool-least-50-cases.htm" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-radar-400 underline decoration-radar-400/40 underline-offset-4 transition-colors hover:text-radar-300">
-                      TechTimes investigation
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
-                    </a>
-                    <a href="https://www.techspot.com/news/113325-dozens-police-officers-accused-using-license-plate-cameras.html" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-radar-400 underline decoration-radar-400/40 underline-offset-4 transition-colors hover:text-radar-300">
-                      TechSpot coverage
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
-                    </a>
-                  </div>
-                </div>
-              </Reveal>
-              <Reveal delay={200}>
-                <div className="hud-card hud-scanlines card-lift h-full rounded-md border border-navy-700 bg-navy-900 p-5 shadow-sm">
-                  <div className="hud-header-strip">
-                    <span className="hud-led hud-led-warn" aria-hidden="true" />
-                    <span className="mono-data">LOG.016 // POLICY_GAP</span>
-                  </div>
-                  <h4 className="font-semibold text-steel-100">Policy violations without criminal consequences</h4>
-                  <p className="mt-2 text-sm leading-6 text-steel-300">
-                    A Missouri officer admitted using Flock cameras to track his ex-wife during a
-                    divorce. Investigators confirmed he broke department policy, then closed the
-                    case anyway because no crime existed under state law. A clear abuse of power
-                    with no consequences.
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-3 text-xs">
-                    <a href="https://www.firstalert4.com/2026/08/03/brentwood-officer-accused-using-license-plate-reader-stalk-ex-wife/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-radar-400 underline decoration-radar-400/40 underline-offset-4 transition-colors hover:text-radar-300">
-                      First Alert 4 report
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
-                    </a>
-                  </div>
-                </div>
-              </Reveal>
-              <Reveal delay={300}>
-                <div className="hud-card hud-scanlines card-lift h-full rounded-md border border-navy-700 bg-navy-900 p-5 shadow-sm">
-                  <div className="hud-header-strip">
-                    <span className="hud-led hud-led-warn" aria-hidden="true" />
-                    <span className="mono-data">LOG.017 // FUNCTION_CREEP</span>
-                  </div>
-                  <h4 className="font-semibold text-steel-100">Local crime tool → federal immigration surveillance</h4>
-                  <p className="mt-2 text-sm leading-6 text-steel-300">
-                    Plate data collected for local police has ended up in immigration enforcement.
-                    Investigations show Flock data used in ICE operations and federal agencies
-                    tapping into local camera networks. Most communities never agreed to that.
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-3 text-xs">
-                    <a href="https://stateofsurveillance.org/articles/surveillance/flock-safety-license-plate-readers-ice-2025/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-radar-400 underline decoration-radar-400/40 underline-offset-4 transition-colors hover:text-radar-300">
-                      State of Surveillance
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
-                    </a>
-                    <a href="https://www.yahoo.com/news/us/articles/stalker-cams-inside-widespread-abuse-171100932.html" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-radar-400 underline decoration-radar-400/40 underline-offset-4 transition-colors hover:text-radar-300">
-                      AP: &ldquo;Stalker Cams&rdquo;
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
-                    </a>
-                  </div>
-                </div>
-              </Reveal>
+                </Reveal>
+              ))}
             </div>
           </div>
 
