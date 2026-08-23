@@ -24,7 +24,6 @@ const cardDateFmt = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   timeZone: 'UTC',
 });
-const yearFmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', timeZone: 'UTC' });
 
 export default async function AbusePage() {
   const rows = await db
@@ -51,19 +50,10 @@ export default async function AbusePage() {
   const todayTs = Date.now();
   const rangeMin = cases.length ? Math.min(...cases.map((c) => c.ts)) : todayTs;
   const rangeMax = Math.max(todayTs, ...cases.map((c) => c.ts));
-  const minYear = Number(yearFmt.format(rangeMin));
-  const maxYear = Number(yearFmt.format(rangeMax));
-  const yearTicks: { ts: number; label: string }[] = [];
-  for (let y = minYear; y <= maxYear; y++) {
-    yearTicks.push({ ts: Date.UTC(y, 0, 1), label: String(y) });
-  }
 
   const timelineProps: TimelineProps = {
     cases,
     todayTs,
-    rangeMin,
-    rangeMax,
-    yearTicks,
     rangeStartLabel: shortFmt.format(rangeMin),
     rangeEndLabel: shortFmt.format(rangeMax),
   };
