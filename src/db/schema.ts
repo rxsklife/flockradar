@@ -192,7 +192,7 @@ export const corrections = pgTable('corrections', {
 
 export const leads = pgTable('leads', {
   id: uuid('id').defaultRandom().primaryKey(),
-  url: varchar('url', { length: 2000 }).notNull().unique(),
+  url: text('url').notNull().unique(),
   title: text('title').notNull(),
   summary: text('summary'),
   sourceName: varchar('source_name', { length: 255 }),
@@ -200,6 +200,7 @@ export const leads = pgTable('leads', {
   status: varchar('status', { length: 20 }).notNull().default('pending'),
   reviewerNotes: text('reviewer_notes'),
   reviewedAt: timestamp('reviewed_at'),
+  processedAt: timestamp('processed_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

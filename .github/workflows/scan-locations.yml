@@ -1,0 +1,38 @@
+name: Daily location ingest
+on:
+  schedule:
+    # 15 minutes after the lead scan, daily
+    - cron: '15 12 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Apply database migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run db:migrate
+      - name: Ingest approved leads as community cameras
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: node scripts/scan-locations.mjs
+      - name: Commit updated community layer
+        run: |
+          git config user.name "flockradar-bot"
+          git config user.email "bot@flockradar.com"
+          git add public/community-cameras.json
+          if git diff --cached --quiet; then
+            echo "no changes to commit"
+          else
+            git commit -m "community: ingest newly approved camera locations"
+            git push
+          fi
