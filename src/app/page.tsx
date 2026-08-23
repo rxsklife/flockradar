@@ -393,6 +393,16 @@ export default async function HomePage() {
             </div>
           </div>
 
+          <div className="mt-10 text-center">
+            <a
+              href="/abuse"
+              className="btn-secondary inline-flex items-center gap-2"
+            >
+              See more cases
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+            </a>
+          </div>
+
           <div className="mx-auto mt-16 max-w-5xl">
             <Reveal>
               <div className="text-center">
