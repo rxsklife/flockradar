@@ -47,9 +47,20 @@ export default async function AbusePage() {
   // eslint-disable-next-line react-hooks/purity -- request-time value on a force-dynamic page
   const todayTs = Date.now();
 
+  // eslint-disable-next-line react-hooks/purity -- calendar boundaries computed per request
+  const d = new Date(todayTs);
+  const y = d.getUTCFullYear();
+  const m = d.getUTCMonth();
+  const dow = d.getUTCDay();
+
   const timelineProps: TimelineProps = {
     cases: rows,
-    todayTs,
+    boundaries: {
+      week: Date.UTC(y, m, d.getUTCDate() - ((dow + 6) % 7)),
+      month: Date.UTC(y, m, 1),
+      quarter: Date.UTC(y, m - (m % 3), 1),
+      year: Date.UTC(y, 0, 1),
+    },
   };
 
   return (
@@ -62,7 +73,7 @@ export default async function AbusePage() {
 
       <section className="relative">
         <HudBackdrop />
-        <div className="relative mx-auto max-w-4xl px-4 pb-24 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-4xl px-4 pt-10 pb-24 sm:px-6 lg:px-8">
           <AbuseTimeline {...timelineProps} />
         </div>
       </section>

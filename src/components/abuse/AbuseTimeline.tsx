@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Reveal from '@/components/Reveal';
 
 export interface AbuseCaseRow {
@@ -15,15 +15,15 @@ export interface AbuseCaseRow {
 
 export interface TimelineProps {
   cases: AbuseCaseRow[];
-  todayTs: number;
+  boundaries: { week: number; month: number; quarter: number; year: number };
 }
 
 const FILTERS = [
-  { key: 'all', label: 'All', days: null as number | null },
-  { key: 'week', label: 'This week', days: 7 },
-  { key: 'month', label: 'This month', days: 30 },
-  { key: 'quarter', label: 'This quarter', days: 90 },
-  { key: 'year', label: 'This year', days: 365 },
+  { key: 'all', label: 'All' },
+  { key: 'week', label: 'This week' },
+  { key: 'month', label: 'This month' },
+  { key: 'quarter', label: 'This quarter' },
+  { key: 'year', label: 'This year' },
 ] as const;
 
 type FilterKey = (typeof FILTERS)[number]['key'];
@@ -39,18 +39,20 @@ function monthOf(ts: number): string {
   return monthFmt.format(ts).toUpperCase();
 }
 
-export default function AbuseTimeline({ cases, todayTs }: TimelineProps) {
+function cutoffFor(boundaries: TimelineProps['boundaries'], key: FilterKey): number {
+  if (key === 'all') return -Infinity;
+  return boundaries[key];
+}
+
+export default function AbuseTimeline({ cases, boundaries }: TimelineProps) {
   const [filter, setFilter] = useState<FilterKey>('all');
   const [activeId, setActiveId] = useState<string | null>(null);
-  const rowRefs = useRef(new Map<string, HTMLElement>());
 
   const filtered = useMemo(() => {
-    const f = FILTERS.find((x) => x.key === filter);
-    const cutoff = f?.days === null ? -Infinity : todayTs - (f?.days ?? 0) * 86400000;
     return cases
-      .filter((c) => c.ts >= cutoff)
+      .filter((c) => c.ts >= cutoffFor(boundaries, filter))
       .sort((a, b) => a.ts - b.ts);
-  }, [cases, filter, todayTs]);
+  }, [cases, filter, boundaries]);
 
   const byYear = useMemo(() => {
     const map = new Map<number, AbuseCaseRow[]>();
@@ -63,28 +65,11 @@ export default function AbuseTimeline({ cases, todayTs }: TimelineProps) {
     return [...map.entries()];
   }, [filtered]);
 
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        const top = visible[0]?.target as HTMLElement | undefined;
-        if (top?.dataset.id) setActiveId(top.dataset.id);
-      },
-      { rootMargin: '-20% 0px -60% 0px', threshold: [0.1, 0.5] },
-    );
-    for (const el of rowRefs.current.values()) obs.observe(el);
-    return () => obs.disconnect();
-  }, [filtered]);
-
   return (
     <div className="mx-auto max-w-3xl">
       <div className="flex flex-wrap items-center gap-1.5">
         {FILTERS.map((f) => {
-          const days = f.days;
-          const count =
-            days === null ? cases.length : cases.filter((c) => c.ts >= todayTs - days * 86400000).length;
+          const count = cases.filter((c) => c.ts >= cutoffFor(boundaries, f.key)).length;
           return (
             <button
               key={f.key}
@@ -118,10 +103,8 @@ export default function AbuseTimeline({ cases, todayTs }: TimelineProps) {
               return (
                 <Reveal key={c.id} delay={Math.min(i * 40, 160)}>
                   <div
-                    ref={(el) => {
-                      if (el) rowRefs.current.set(c.id, el);
-                    }}
-                    data-id={c.id}
+                    onMouseEnter={() => setActiveId(c.id)}
+                    onMouseLeave={() => setActiveId((v) => (v === c.id ? null : v))}
                     className="relative border-l border-navy-600/40 pb-7 pl-8 sm:pl-10"
                   >
                     <span
