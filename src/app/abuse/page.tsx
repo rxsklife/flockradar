@@ -17,7 +17,6 @@ export const metadata: Metadata = {
     'Documented cases of license plate reader misuse: stalking, harassment, unlawful surveillance, and other abuses involving ALPR data.',
 };
 
-const shortFmt = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 const cardDateFmt = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
@@ -26,14 +25,13 @@ const cardDateFmt = new Intl.DateTimeFormat('en-US', {
 });
 
 export default async function AbusePage() {
-  const rows = await db
+  const cases = await db
     .select()
     .from(abuseCases)
     .where(eq(abuseCases.status, 'approved'))
-    .orderBy(desc(abuseCases.publishedAt))
-    .limit(200);
+    .orderBy(desc(abuseCases.publishedAt));
 
-  const cases: AbuseCaseRow[] = rows.map((c) => {
+  const rows: AbuseCaseRow[] = cases.map((c) => {
     const ts = (c.publishedAt ?? c.createdAt).getTime();
     return {
       id: c.id,
@@ -48,14 +46,10 @@ export default async function AbusePage() {
 
   // eslint-disable-next-line react-hooks/purity -- request-time value on a force-dynamic page
   const todayTs = Date.now();
-  const rangeMin = cases.length ? Math.min(...cases.map((c) => c.ts)) : todayTs;
-  const rangeMax = Math.max(todayTs, ...cases.map((c) => c.ts));
 
   const timelineProps: TimelineProps = {
-    cases,
+    cases: rows,
     todayTs,
-    rangeStartLabel: shortFmt.format(rangeMin),
-    rangeEndLabel: shortFmt.format(rangeMax),
   };
 
   return (
@@ -68,7 +62,7 @@ export default async function AbusePage() {
 
       <section className="relative">
         <HudBackdrop />
-        <div className="relative mx-auto max-w-4xl px-4 pt-16 pb-20 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-4xl px-4 pb-24 sm:px-6 lg:px-8">
           <AbuseTimeline {...timelineProps} />
         </div>
       </section>

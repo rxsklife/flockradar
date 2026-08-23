@@ -437,34 +437,6 @@ select optgroup {
     0 10px 30px rgba(2, 8, 16, 0.5);
 }
 
-/* Abuse incident timeline */
-.tl-canvas {
-  background-image:
-    repeating-linear-gradient(0deg, transparent 0 23px, rgba(148, 184, 214, 0.05) 23px 24px),
-    repeating-linear-gradient(90deg, transparent 0 23px, rgba(148, 184, 214, 0.05) 23px 24px);
-}
-.tl-node {
-  transform: translateX(-50%);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.tl-node-active {
-  transform: translateX(-50%) scale(1.35);
-  animation: tl-pulse 1.8s ease-in-out infinite;
-}
-@keyframes tl-pulse {
-  0%,
-  100% {
-    box-shadow:
-      0 0 10px currentColor,
-      0 0 0 3px rgba(32, 184, 200, 0.18);
-  }
-  50% {
-    box-shadow:
-      0 0 18px currentColor,
-      0 0 0 6px rgba(32, 184, 200, 0.28);
-  }
-}
-
 .btn-primary,
 .btn-secondary {
   position: relative;
