@@ -15,6 +15,16 @@ export const metadata: Metadata = {
   title: 'Reported Abuse',
   description:
     'Documented cases of license plate reader misuse: stalking, harassment, unlawful surveillance, and other abuses involving ALPR data.',
+  openGraph: {
+    title: 'Abuse Log',
+    description:
+      'Reported cases of license plate reader misuse.',
+    images: [{ url: 'https://flockradar.com/abuse-og.png', width: 1200, height: 675 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['https://flockradar.com/abuse-og.png'],
+  },
 };
 
 const cardDateFmt = new Intl.DateTimeFormat('en-US', {

@@ -226,7 +226,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
             { lat: end.lat, lon: end.lng },
           ],
           costing: 'auto',
-          units: 'kilometers',
+          units: 'miles',
           ...(excludePolys.length ? { exclude_polygons: excludePolys } : {}),
         };
         const res = (await fetchJson('https://valhalla1.openstreetmap.de/route', 20000, {
@@ -351,7 +351,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
 
       setResult({
         geometry,
-        distanceM: Math.round(route.distance),
+        distanceM: Math.round(route.distance * 1609.344),
         durationS: Math.round(route.duration),
         cameraHits,
         maneuvers: route.maneuvers,
@@ -363,7 +363,12 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
     }
   }, [map, from, to, fromIsMyLocation, clearRoute, getCameras]);
 
-  const fmtDist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
+  const fmtDist = (m: number) => {
+    const ft = m * 3.28084;
+    if (ft < 1000) return `${Math.round(ft)} ft`;
+    const mi = ft / 5280;
+    return mi < 10 ? `${mi.toFixed(2)} mi` : `${Math.round(mi)} mi`;
+  };
   const fmtDur = (s: number) => {
     const min = Math.floor(s / 60);
     return `${min} min`;
