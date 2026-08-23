@@ -121,7 +121,7 @@ export default function LiveFeed() {
   return (
     <section
       ref={sectionRef}
-      className={`sticky top-[63px] z-30 overflow-hidden border-y border-navy-700/70 bg-navy-950 ${stuck ? 'border-t-transparent' : ''}`}
+      className={`sticky top-[63px] z-30 overflow-hidden border-y border-navy-700 bg-navy-950 ${stuck ? 'border-t-transparent' : ''}`}
     >
       <div className="flex items-center gap-3 px-4 py-2.5 sm:gap-5 sm:px-6 sm:py-3 lg:px-8">
         <div className="flex shrink-0 items-center gap-2">
