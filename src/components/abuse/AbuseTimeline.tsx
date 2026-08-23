@@ -67,20 +67,20 @@ export default function AbuseTimeline({ cases, boundaries }: TimelineProps) {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-nowrap items-center gap-1 overflow-x-auto pb-0.5 sm:gap-1.5">
         {FILTERS.map((f) => {
           const count = cases.filter((c) => c.ts >= cutoffFor(boundaries, f.key)).length;
           return (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`mono-data rounded-sm px-2.5 py-1.5 text-[10px] uppercase tracking-[0.14em] transition-colors ${
+              className={`mono-data rounded-sm px-1 py-1 text-[9px] uppercase tracking-[0.1em] whitespace-nowrap transition-colors sm:px-2.5 sm:py-1.5 sm:text-[10px] sm:tracking-[0.14em] ${
                 filter === f.key
                   ? 'bg-radar-500/15 text-radar-300 ring-1 ring-radar-500/40'
                   : 'text-steel-400 hover:bg-navy-800 hover:text-steel-200'
               }`}
             >
-              {f.label} <span className="text-steel-500">{count}</span>
+              {f.label} <span className="hidden text-steel-500 sm:inline">{count}</span>
             </button>
           );
         })}

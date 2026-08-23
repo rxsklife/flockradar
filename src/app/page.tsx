@@ -142,7 +142,7 @@ export default async function HomePage() {
                   {[
                     { label: 'Agencies mapped', value: stats.entities },
                     { label: 'States covered', value: stats.states },
-                    { label: 'Public records', value: stats.sources },
+                    { label: 'Cameras marked', value: stats.sources },
                   ].map((chip) => (
                     <div
                       key={chip.label}
