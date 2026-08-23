@@ -29,6 +29,13 @@
       "when": 1786713175129,
       "tag": "0003_narrow_vision",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1787484142927,
+      "tag": "0004_empty_vector",
+      "breakpoints": true
     }
   ]
 }

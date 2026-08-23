@@ -189,3 +189,31 @@ export const corrections = pgTable('corrections', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+export const leads = pgTable('leads', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  url: varchar('url', { length: 2000 }).notNull().unique(),
+  title: text('title').notNull(),
+  summary: text('summary'),
+  sourceName: varchar('source_name', { length: 255 }),
+  publishedAt: timestamp('published_at'),
+  status: varchar('status', { length: 20 }).notNull().default('pending'),
+  reviewerNotes: text('reviewer_notes'),
+  reviewedAt: timestamp('reviewed_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const abuseCases = pgTable('abuse_cases', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  url: varchar('url', { length: 2000 }).notNull().unique(),
+  title: text('title').notNull(),
+  summary: text('summary'),
+  sourceName: varchar('source_name', { length: 255 }),
+  publishedAt: timestamp('published_at'),
+  status: varchar('status', { length: 20 }).notNull().default('pending'),
+  reviewerNotes: text('reviewer_notes'),
+  reviewedAt: timestamp('reviewed_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
