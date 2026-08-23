@@ -4,7 +4,10 @@ import { db } from '@/db';
 import { abuseCases } from '@/db/schema';
 import PageHeader from '@/components/layout/PageHeader';
 import HudBackdrop from '@/components/HudBackdrop';
-import Reveal from '@/components/Reveal';
+import AbuseTimeline, {
+  type AbuseCaseRow,
+  type TimelineProps,
+} from '@/components/abuse/AbuseTimeline';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,68 +17,69 @@ export const metadata: Metadata = {
     'Documented cases of license plate reader misuse: stalking, harassment, unlawful surveillance, and other abuses involving ALPR data.',
 };
 
+const shortFmt = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+const cardDateFmt = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+const yearFmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', timeZone: 'UTC' });
+
 export default async function AbusePage() {
-  const cases = await db
+  const rows = await db
     .select()
     .from(abuseCases)
     .where(eq(abuseCases.status, 'approved'))
     .orderBy(desc(abuseCases.publishedAt))
-    .limit(100);
+    .limit(200);
+
+  const cases: AbuseCaseRow[] = rows.map((c) => {
+    const ts = (c.publishedAt ?? c.createdAt).getTime();
+    return {
+      id: c.id,
+      title: c.title,
+      summary: c.summary,
+      url: c.url,
+      sourceName: c.sourceName,
+      displayDate: cardDateFmt.format(ts),
+      ts,
+    };
+  });
+
+  // eslint-disable-next-line react-hooks/purity -- request-time value on a force-dynamic page
+  const todayTs = Date.now();
+  const rangeMin = cases.length ? Math.min(...cases.map((c) => c.ts)) : todayTs;
+  const rangeMax = Math.max(todayTs, ...cases.map((c) => c.ts));
+  const minYear = Number(yearFmt.format(rangeMin));
+  const maxYear = Number(yearFmt.format(rangeMax));
+  const yearTicks: { ts: number; label: string }[] = [];
+  for (let y = minYear; y <= maxYear; y++) {
+    yearTicks.push({ ts: Date.UTC(y, 0, 1), label: String(y) });
+  }
+
+  const timelineProps: TimelineProps = {
+    cases,
+    todayTs,
+    rangeMin,
+    rangeMax,
+    yearTicks,
+    rangeStartLabel: shortFmt.format(rangeMin),
+    rangeEndLabel: shortFmt.format(rangeMax),
+  };
 
   return (
     <>
       <PageHeader
-        eyebrow="// ABUSE LOG"
+        eyebrow="ABUSE LOG"
         title="Reported cases of abuse"
         description="Documented misuse of license plate reader data. Each case links to its source. New reports are scanned daily and reviewed before publication."
       />
 
-      <section className="relative overflow-hidden">
+      <section className="relative">
         <HudBackdrop />
-        <div className="relative mx-auto max-w-3xl px-4 pt-20 pb-20 sm:px-6 lg:px-8">
-          {cases.length === 0 ? (
-            <Reveal>
-              <p className="text-steel-400">
-                No published cases yet. Reports are reviewed daily and appear here once approved.
-              </p>
-            </Reveal>
-          ) : (
-            <div className="space-y-4">
-              {cases.map((c, i) => (
-                <Reveal key={c.id} delay={Math.min(i * 40, 200)}>
-                  <div className="hud-card hud-scanlines card-lift rounded-md border border-navy-700 bg-navy-900 p-5 shadow-sm">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="mono-data inline-flex items-center gap-1.5 rounded border border-navy-600 bg-navy-800 px-2 py-0.5 text-[11px] font-semibold tracking-wide text-steel-200">
-                        <span className="hud-led hud-led-warn" aria-hidden="true" />
-                        ABUSE CASE {c.id.slice(0, 4).toUpperCase()}
-                      </span>
-                      <span className="mono-data text-xs text-steel-400">
-                        {c.publishedAt
-                          ? new Date(c.publishedAt).toLocaleDateString()
-                          : new Date(c.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <h3 className="mt-2 text-base font-semibold text-steel-100">{c.title}</h3>
-                    {c.summary && <p className="mt-1.5 text-sm text-steel-300">{c.summary}</p>}
-                    {c.sourceName && (
-                      <p className="mono-data mt-2 text-xs text-steel-400">via {c.sourceName}</p>
-                    )}
-                    {c.url && (
-                      <a
-                        href={c.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-flex items-center gap-1 text-radar-400 underline decoration-radar-400/40 underline-offset-4 transition-colors hover:text-radar-300"
-                      >
-                        Read the report
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
-                      </a>
-                    )}
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-          )}
+        <div className="relative mx-auto max-w-4xl px-4 pt-16 pb-20 sm:px-6 lg:px-8">
+          <AbuseTimeline {...timelineProps} />
         </div>
       </section>
     </>
