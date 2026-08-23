@@ -11,7 +11,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/publishing-policy`, lastModified: now, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${base}/changelog`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
     { url: `${base}/abuse`, lastModified: now, changeFrequency: 'daily', priority: 0.6 },
-    { url: `${base}/leads`, lastModified: now, changeFrequency: 'daily', priority: 0.4 },
     { url: `${base}/submit`, lastModified: now, changeFrequency: 'yearly', priority: 0.4 },
     { url: `${base}/correct`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ];

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 type FeedItem = {
   title: string;
@@ -106,8 +106,23 @@ export default function LiveFeed() {
     [items.length]
   );
 
+  const [stuck, setStuck] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const onScroll = () => setStuck(el.getBoundingClientRect().top <= 64);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <section className="sticky top-[63px] z-30 overflow-hidden border-b border-navy-700/70 bg-navy-950/90 backdrop-blur-md">
+    <section
+      ref={sectionRef}
+      className={`sticky top-[63px] z-30 overflow-hidden border-y border-navy-700/70 bg-navy-950 ${stuck ? 'border-t-transparent' : ''}`}
+    >
       <div className="flex items-center gap-3 px-4 py-2.5 sm:gap-5 sm:px-6 sm:py-3 lg:px-8">
         <div className="flex shrink-0 items-center gap-2">
           <span
