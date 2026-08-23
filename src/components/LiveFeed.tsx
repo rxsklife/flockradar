@@ -102,12 +102,12 @@ export default function LiveFeed() {
   const items = feed?.items?.length ? feed.items : FALLBACK_ITEMS;
   const fresh = feed?.fresh ?? false;
   const tickerDuration = useMemo(
-    () => `${Math.max(28, items.length * 6)}s`,
+    () => `${Math.max(56, items.length * 12)}s`,
     [items.length]
   );
 
   return (
-    <section className="sticky top-[63px] z-30 overflow-hidden border-y border-navy-700/70 bg-navy-950/90 backdrop-blur-md">
+    <section className="sticky top-[63px] z-30 overflow-hidden border-b border-navy-700/70 bg-navy-950/90 backdrop-blur-md">
       <div className="flex items-center gap-3 px-4 py-2.5 sm:gap-5 sm:px-6 sm:py-3 lg:px-8">
         <div className="flex shrink-0 items-center gap-2">
           <span
