@@ -1172,10 +1172,10 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
       )}
       </div>
       {navigating && fullscreenNav && !navMinimized && result && (
-        <div className="fixed inset-0 z-[2000] flex items-start justify-center p-3 sm:p-6">
+        <div className="pointer-events-none fixed inset-0 z-[2000] flex items-start justify-center p-3 sm:p-6">
           <div
             ref={navRef}
-            className="hud-panel flex w-full max-w-md flex-col space-y-2 overflow-hidden p-3"
+            className="pointer-events-auto hud-panel flex w-full max-w-md flex-col space-y-2 overflow-hidden p-3"
             style={{ maxHeight: navMaxH }}
           >
             <div className="flex items-center justify-between gap-2">
