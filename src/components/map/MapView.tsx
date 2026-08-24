@@ -992,7 +992,7 @@ export default function MapView() {
           aria-label="Street View"
         >
           <div
-            className="relative w-full max-w-3xl overflow-hidden rounded-xl border border-navy-500/40 bg-navy-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_20px_60px_rgba(2,8,16,0.6)]"
+            className="hud-panel relative w-full max-w-3xl overflow-hidden shadow-[0_20px_60px_rgba(2,8,16,0.6)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-navy-700 px-4 py-2">
@@ -1020,7 +1020,7 @@ export default function MapView() {
 
       {markerCount === 0 && (
         <div className="absolute inset-0 z-[1000] flex items-center justify-center">
-          <div className="mx-4 max-w-sm rounded-lg bg-navy-900/95 p-6 text-center shadow-lg ring-1 ring-navy-600">
+          <div className="hud-panel mx-4 max-w-sm p-6 text-center shadow-lg">
             <p className="font-semibold text-steel-100">No matching records</p>
             <p className="mt-2 text-sm text-steel-400">
               No deployments match the current filters. Try clearing a filter or widening the
@@ -1051,14 +1051,15 @@ export default function MapView() {
       <Legend />
 
       {showMobileFilters && (
-        <div className="fixed inset-0 z-[1100] flex flex-col bg-navy-950/95 backdrop-blur-md sm:hidden!">
-          <div className="flex shrink-0 items-center justify-between border-b border-navy-700/70 px-4 py-3">
+        <div className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:hidden!">
+          <div className="hud-panel hud-card flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden shadow-[0_24px_80px_rgba(2,8,16,0.7)]">
+          <div className="flex shrink-0 items-center justify-between border-b border-radar-500/20 px-4 py-3">
             <p className="mono-data text-[10px] uppercase tracking-[0.18em] text-steel-300">
               Filter deployments
             </p>
             <button
               onClick={() => setShowMobileFilters(false)}
-              className="hud-chip px-3 py-1.5 text-xs"
+              className="hud-chip px-2.5! py-1! text-[10px]!"
               aria-label="Close filters"
             >
               Close
@@ -1076,6 +1077,7 @@ export default function MapView() {
               onBasemapChange={handleBasemapChange}
             />
           </div>
+          </div>
         </div>
       )}
 
@@ -1087,7 +1089,7 @@ export default function MapView() {
 
             if (m && userLocation) m.setView(userLocation, 17, { animate: false });
           }}
-          className="absolute bottom-20 left-4 z-[1000] flex h-11 w-11 items-center justify-center rounded-full border border-navy-500/40 bg-navy-900/60 text-radar-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:bg-navy-900/80 hover:text-radar-300 sm:bottom-4"
+          className="absolute bottom-20 left-4 z-[1000] flex h-11 w-11 items-center justify-center rounded-full border border-radar-500/45 bg-navy-950/80 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:bg-navy-900/80 hover:text-steel-200 sm:bottom-4"
           aria-label="Snap back to my location"
           title="Back to my location"
         >

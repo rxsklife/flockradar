@@ -92,7 +92,7 @@ export default function FilterBar({
         <select
           value={filters.state || ''}
           onChange={(e) => onChange('state', e.target.value)}
-          className="w-full rounded border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-steel-100"
+          className="hud-chip w-full px-2 py-1 text-xs text-steel-100"
         >
           <option value="">All states</option>
           {STATES.map((s) => (
@@ -108,7 +108,7 @@ export default function FilterBar({
         <select
           value={filters.status || ''}
           onChange={(e) => onChange('status', e.target.value)}
-          className="w-full rounded border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-steel-100"
+          className="hud-chip w-full px-2 py-1 text-xs text-steel-100"
         >
           <option value="">All</option>
           {statusLegend.map((s) => (
@@ -124,7 +124,7 @@ export default function FilterBar({
         <select
           value={filters.entityType || ''}
           onChange={(e) => onChange('entityType', e.target.value)}
-          className="w-full rounded border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-steel-100"
+          className="hud-chip w-full px-2 py-1 text-xs text-steel-100"
         >
           <option value="">All</option>
           {ENTITY_TYPES.map((t) => (
@@ -140,7 +140,7 @@ export default function FilterBar({
         <select
           value={filters.vendor || ''}
           onChange={(e) => onChange('vendor', e.target.value)}
-          className="w-full rounded border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-steel-100"
+          className="hud-chip w-full px-2 py-1 text-xs text-steel-100"
         >
           <option value="">All</option>
           {VENDORS.map((v) => (
@@ -156,7 +156,7 @@ export default function FilterBar({
         <select
           value={filters.sourceStrength || ''}
           onChange={(e) => onChange('sourceStrength', e.target.value)}
-          className="w-full rounded border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-steel-100"
+          className="hud-chip w-full px-2 py-1 text-xs text-steel-100"
         >
           <option value="">All evidence</option>
           <option value="primary">Primary source only</option>
@@ -169,7 +169,7 @@ export default function FilterBar({
         <select
           value={filters.pointType || ''}
           onChange={(e) => onChange('pointType', e.target.value)}
-          className="w-full rounded border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-steel-100"
+          className="hud-chip w-full px-2 py-1 text-xs text-steel-100"
         >
           <option value="">All points</option>
           <option value="entity_level">Entity-level only</option>
@@ -178,14 +178,14 @@ export default function FilterBar({
       </div>
 
       {onBasemapChange && (
-        <div className="mt-3 border-t border-navy-700 pt-3">
+        <div className="mt-3 border-t border-radar-500/20 pt-3">
           <label className="mb-1 block text-xs text-steel-300">Basemap</label>
-          <div className="grid grid-cols-2 gap-1 rounded-md border border-navy-600 bg-navy-800 p-1">
+          <div className="hud-chip w-full grid-cols-2 gap-1 rounded-md p-1">
             <button
               onClick={() => onBasemapChange('dark')}
-              className={`rounded px-2 py-1 text-xs font-semibold transition-colors ${
+              className={`hud-chip rounded px-2 py-1 text-xs font-semibold transition-colors ${
                 basemap === 'dark'
-                  ? 'bg-radar-500/20 text-radar-300'
+                  ? 'bg-radar-500/20! text-radar-300!'
                   : 'text-steel-400 hover:text-steel-200'
               }`}
             >
@@ -193,9 +193,9 @@ export default function FilterBar({
             </button>
             <button
               onClick={() => onBasemapChange('detailed')}
-              className={`rounded px-2 py-1 text-xs font-semibold transition-colors ${
+              className={`hud-chip rounded px-2 py-1 text-xs font-semibold transition-colors ${
                 basemap === 'detailed'
-                  ? 'bg-radar-500/20 text-radar-300'
+                  ? 'bg-radar-500/20! text-radar-300!'
                   : 'text-steel-400 hover:text-steel-200'
               }`}
               title="Shows business names and points of interest"
@@ -207,7 +207,7 @@ export default function FilterBar({
       )}
 
       {onToggleCommunity && (
-        <div className="mt-3 border-t border-navy-700 pt-3">
+        <div className="mt-3 border-t border-radar-500/20 pt-3">
           <label className="flex cursor-pointer items-start gap-2">
             <input
               type="checkbox"
@@ -231,7 +231,7 @@ export default function FilterBar({
               </p>
               <a
                 href="/submit"
-                className="block rounded-lg border border-navy-600 bg-navy-800 px-3 py-2 text-center text-xs font-semibold text-steel-100 transition-colors hover:border-radar-500/50 hover:bg-navy-700"
+                className="btn-secondary block w-full px-3! py-2! text-xs! font-semibold!"
               >
                 Report a camera
               </a>

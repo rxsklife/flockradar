@@ -27,20 +27,20 @@ export default function SearchBar({ onSelect }: SearchBarProps) {
   }, []);
 
   return (
-    <div className="absolute left-4 top-4 z-[1000] w-72 sm:w-80">
+    <div className="absolute left-4 top-4 z-[1000] w-60 sm:w-64">
       <input
         type="text"
         placeholder="Search city, county, state, or agency..."
         value={query}
         onChange={(e) => handleSearch(e.target.value)}
-        className="w-full rounded-lg border border-navy-600 bg-navy-900 px-4 py-2.5 text-sm text-steel-100 shadow-sm placeholder:text-steel-400 focus:border-radar-500 focus:outline-none focus:ring-1 focus:ring-radar-500"
+        className="hud-chip w-full px-3! py-2! text-[16px] text-steel-100 placeholder:text-steel-400 shadow-sm sm:text-xs"
       />
       {isOpen && (
-        <ul className="mt-1 max-h-60 overflow-y-auto rounded-lg border border-navy-600 bg-navy-900 shadow-lg">
+        <ul className="hud-panel mt-1 max-h-60 overflow-y-auto">
           {results.map((entity) => (
             <li
               key={entity.id}
-              className="cursor-pointer px-4 py-2 text-sm text-steel-100 transition-colors hover:bg-navy-800"
+              className="cursor-pointer px-4 py-2 text-sm text-steel-100 transition-colors hover:bg-radar-500/10"
               onClick={() => {
                 onSelect(entity);
                 setIsOpen(false);

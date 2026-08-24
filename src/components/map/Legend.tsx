@@ -1,6 +1,6 @@
 export default function Legend() {
   return (
-    <div className="absolute bottom-24 right-4 z-[1000] hidden w-44 rounded-lg border border-navy-600 bg-navy-900 p-2.5 shadow-lg sm:block">
+    <div className="hud-panel absolute bottom-24 right-4 z-[1000] hidden w-44 p-2.5 sm:block">
       <h3 className="mb-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-steel-400">
         Legend
       </h3>
