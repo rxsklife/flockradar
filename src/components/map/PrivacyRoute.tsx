@@ -451,6 +451,35 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
   const lastNavPosRef = useRef<RoutePoint | null>(null);
   const watchIdRef = useRef<number | null>(null);
   const rerouteLockRef = useRef(0);
+  const mapRef = useRef<L.Map | null>(null);
+  const liveDotRef = useRef<L.LayerGroup | null>(null);
+
+  useEffect(() => {
+    mapRef.current = map;
+  }, [map]);
+
+  const drawLiveDot = useCallback((p: RoutePoint) => {
+    const m = mapRef.current;
+    if (!m) return;
+    liveDotRef.current?.remove();
+    liveDotRef.current = L.layerGroup([
+      L.circle([p.lat, p.lng], {
+        radius: 30,
+        color: '#3b82f6',
+        weight: 1,
+        opacity: 0.35,
+        fillColor: '#3b82f6',
+        fillOpacity: 0.12,
+      }),
+      L.circleMarker([p.lat, p.lng], {
+        radius: 7,
+        color: '#ffffff',
+        weight: 2.5,
+        fillColor: '#3b82f6',
+        fillOpacity: 1,
+      }),
+    ]).addTo(m);
+  }, []);
 
 
   const getCameras = useCallback(async (): Promise<[number, number][] | null> => {
@@ -470,6 +499,8 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
       else navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
+    liveDotRef.current?.remove();
+    liveDotRef.current = null;
     setNavigating(false);
   }, []);
 
@@ -482,6 +513,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
     const last = lastNavPosRef.current;
     lastNavPosRef.current = p;
     setNavPos(p);
+    drawLiveDot(p);
     if (!fullscreenNavRef.current && last && (DEMO || distMeters(last, p) > 15)) {
       fullscreenNavRef.current = true;
       setFullscreenNav(true);
@@ -508,7 +540,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
       setFrom('My location');
       findRouteRef.current();
     }
-  }, []);
+  }, [drawLiveDot]);
 
   const startNavigation = useCallback(() => {
     if (!result) return;
@@ -545,6 +577,8 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
         if (DEMO) clearInterval(watchIdRef.current);
         else navigator.geolocation.clearWatch(watchIdRef.current);
       }
+      liveDotRef.current?.remove();
+      liveDotRef.current = null;
     },
     [],
   );
