@@ -977,7 +977,7 @@ export default function MapView() {
 
       <button
         onClick={() => setShowMobileFilters((v) => !v)}
-        className="hud-chip absolute bottom-4 left-4 z-[1000] px-4 py-2 text-sm font-semibold sm:hidden!"
+        className="hud-chip absolute bottom-4 left-4 z-[1200] px-4 py-2 text-sm font-semibold sm:hidden!"
         aria-label="Toggle filters"
       >
         {showMobileFilters ? 'Close' : 'Filters'}
