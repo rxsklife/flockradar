@@ -368,16 +368,23 @@ async function fetchJson(
   url: string,
   timeoutMs = 12000,
   init?: { method?: string; headers?: Record<string, string>; body?: string },
+  retries = 1,
 ): Promise<unknown> {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, { ...init, signal: ctrl.signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } finally {
-    clearTimeout(t);
+  let lastErr: unknown;
+  for (let i = 0; i < retries; i++) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { ...init, signal: ctrl.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      lastErr = e;
+    } finally {
+      clearTimeout(t);
+    }
   }
+  throw lastErr;
 }
 
 function decodePolyline(encoded: string): [number, number][] {
@@ -682,6 +689,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
 
       const valhallaRoute = async (
         excludePolys: number[][][],
+        retries = 1,
       ): Promise<{
         geometry: [number, number][];
         distance: number;
@@ -701,7 +709,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
-        })) as {
+        }, retries)) as {
           trip?: {
             legs: { shape: string; maneuvers?: ValhallaManeuver[] }[];
             summary: { length: number; time: number };
@@ -732,7 +740,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
       };
 
 
-      let route = await valhallaRoute([]);
+      let route = await valhallaRoute([], 2);
       const excluded = new Set<string>();
       let pass = 0;
       while (pass < 3) {
@@ -827,7 +835,12 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
         maneuvers: route.maneuvers,
       });
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Route failed. Try different locations.');
+      const msg = e instanceof Error ? e.message : '';
+      setError(
+        /abort|timed? ?out/i.test(msg)
+          ? 'The route service is busy or unreachable right now. Please try again in a moment.'
+          : msg || 'Route failed. Try different locations.',
+      );
     } finally {
       setLoading(false);
     }
