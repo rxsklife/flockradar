@@ -274,6 +274,25 @@ const MANEUVER_ICONS: Record<number, string> = {
   26: '↖',
 };
 
+const ORS_KEY = (process.env.NEXT_PUBLIC_ORS_API_KEY ?? '').trim();
+
+const ORS_TO_VALHALLA: Record<number, number> = {
+  0: 11,
+  1: 10,
+  2: 16,
+  3: 14,
+  4: 13,
+  5: 12,
+  6: 5,
+  7: 21,
+  8: 21,
+  9: 21,
+  10: 4,
+  11: 1,
+  12: 24,
+  13: 23,
+};
+
 function navGlyph(type: number): string {
   switch (type) {
     case 1:
@@ -727,6 +746,85 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
         };
       };
 
+      const orsRoute = async (
+        excludePolys: number[][][],
+      ): Promise<{
+        geometry: [number, number][];
+        distance: number;
+        duration: number;
+        maneuvers: ValhallaManeuver[];
+      }> => {
+        const res = (await fetchJson('https://api.openrouteservice.org/v2/directions/driving-car/geojson', 20000, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: ORS_KEY,
+          },
+          body: JSON.stringify({
+            coordinates: [
+              [start.lng, start.lat],
+              [end.lng, end.lat],
+            ],
+            ...(excludePolys.length
+              ? {
+                  options: {
+                    avoid_polygons: {
+                      type: 'MultiPolygon',
+                      coordinates: excludePolys.map((ring) => [
+                        ring.map(([la, ln]) => [ln, la] as [number, number]),
+                      ]),
+                    },
+                  },
+                }
+              : {}),
+          }),
+        }, 1)) as {
+          features?: {
+            geometry: { coordinates: [number, number][] };
+            properties: {
+              summary: { distance: number; duration: number };
+              segments: {
+                steps: {
+                  distance: number;
+                  duration: number;
+                  instruction: string;
+                  type: number;
+                  way_points: [number, number];
+                }[];
+              }[];
+            };
+          }[];
+        };
+        const feat = res.features?.[0];
+        if (!feat) throw new Error('No route found between these points.');
+        const coords = feat.geometry.coordinates.map(([ln, la]) => [la, ln] as [number, number]);
+        const steps = feat.properties.segments?.[0]?.steps ?? [];
+        const maneuvers: ValhallaManeuver[] = steps.map((s) => ({
+          begin_shape_index: s.way_points?.[0] ?? 0,
+          instruction: s.instruction,
+          length: (s.distance ?? 0) / 1609.344,
+          time: s.duration ?? 0,
+          type: ORS_TO_VALHALLA[s.type] ?? 5,
+        }));
+        return {
+          geometry: coords,
+          distance: Math.round(feat.properties.summary.distance),
+          duration: feat.properties.summary.duration,
+          maneuvers,
+        };
+      };
+
+      const routePass = async (excludePolys: number[][][], retries = 1) => {
+        if (ORS_KEY) {
+          try {
+            return await orsRoute(excludePolys);
+          } catch {
+            // fall back to the public Valhalla instance
+          }
+        }
+        return valhallaRoute(excludePolys, retries);
+      };
+
       const boxAround = (lat: number, lng: number, m: number): number[][] => {
         const dLat = m / 111320.0;
         const dLng = m / (111320.0 * Math.cos((lat * Math.PI) / 180));
@@ -740,7 +838,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
       };
 
 
-      let route = await valhallaRoute([], 2);
+      let route = await routePass([], 2);
       const excluded = new Set<string>();
       let pass = 0;
       while (pass < 3) {
@@ -759,7 +857,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
         }
         if (polys.length === 0) break;
         try {
-          const newRoute = await valhallaRoute(
+          const newRoute = await routePass(
             [...Array.from(excluded)].map((k) => {
               const [lat, lng] = k.split(',').map(Number);
               return boxAround(lat, lng, 160);
