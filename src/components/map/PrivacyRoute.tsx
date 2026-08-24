@@ -274,23 +274,25 @@ const MANEUVER_ICONS: Record<number, string> = {
   26: '↖',
 };
 
-const ORS_KEY = (process.env.NEXT_PUBLIC_ORS_API_KEY ?? '').trim();
+const GH_KEY = (process.env.NEXT_PUBLIC_GRAPHHOPPER_KEY ?? '').trim();
 
-const ORS_TO_VALHALLA: Record<number, number> = {
-  0: 11,
-  1: 10,
-  2: 16,
+const GH_SIGN_TO_VALHALLA: Record<number, number> = {
+  [-98]: 21,
+  [-8]: 21,
+  [-7]: 24,
+  [-6]: 21,
+  [-3]: 16,
+  [-2]: 11,
+  [-1]: 13,
+  0: 5,
+  1: 12,
+  2: 10,
   3: 14,
-  4: 13,
-  5: 12,
-  6: 5,
-  7: 21,
+  4: 4,
+  5: 5,
+  6: 21,
+  7: 23,
   8: 21,
-  9: 21,
-  10: 4,
-  11: 1,
-  12: 24,
-  13: 23,
 };
 
 function navGlyph(type: number): string {
@@ -709,6 +711,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
       const valhallaRoute = async (
         excludePolys: number[][][],
         retries = 1,
+        timeoutMs = 20000,
       ): Promise<{
         geometry: [number, number][];
         distance: number;
@@ -724,7 +727,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
           units: 'miles',
           ...(excludePolys.length ? { exclude_polygons: excludePolys } : {}),
         };
-        const res = (await fetchJson('https://valhalla1.openstreetmap.de/route', 20000, {
+        const res = (await fetchJson('https://valhalla1.openstreetmap.de/route', timeoutMs, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -746,83 +749,59 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
         };
       };
 
-      const orsRoute = async (
-        excludePolys: number[][][],
-      ): Promise<{
+      const ghRoute = async (): Promise<{
         geometry: [number, number][];
         distance: number;
         duration: number;
         maneuvers: ValhallaManeuver[];
       }> => {
-        const res = (await fetchJson('https://api.openrouteservice.org/v2/directions/driving-car/geojson', 20000, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: ORS_KEY,
+        const res = (await fetchJson(
+          `https://graphhopper.com/api/1/route?key=${encodeURIComponent(GH_KEY)}`,
+          20000,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              points: [
+                [start.lng, start.lat],
+                [end.lng, end.lat],
+              ],
+              points_encoded: false,
+              instructions: true,
+              vehicle: 'car',
+              locale: 'en',
+            }),
           },
-          body: JSON.stringify({
-            coordinates: [
-              [start.lng, start.lat],
-              [end.lng, end.lat],
-            ],
-            ...(excludePolys.length
-              ? {
-                  options: {
-                    avoid_polygons: {
-                      type: 'MultiPolygon',
-                      coordinates: excludePolys.map((ring) => [
-                        ring.map(([la, ln]) => [ln, la] as [number, number]),
-                      ]),
-                    },
-                  },
-                }
-              : {}),
-          }),
-        }, 1)) as {
-          features?: {
-            geometry: { coordinates: [number, number][] };
-            properties: {
-              summary: { distance: number; duration: number };
-              segments: {
-                steps: {
-                  distance: number;
-                  duration: number;
-                  instruction: string;
-                  type: number;
-                  way_points: [number, number];
-                }[];
-              }[];
-            };
+        )) as {
+          paths?: {
+            distance: number;
+            time: number;
+            instructions: {
+              distance: number;
+              time: number;
+              text: string;
+              sign: number;
+              interval: [number, number];
+            }[];
+            points: { coordinates: [number, number][] };
           }[];
         };
-        const feat = res.features?.[0];
-        if (!feat) throw new Error('No route found between these points.');
-        const coords = feat.geometry.coordinates.map(([ln, la]) => [la, ln] as [number, number]);
-        const steps = feat.properties.segments?.[0]?.steps ?? [];
-        const maneuvers: ValhallaManeuver[] = steps.map((s) => ({
-          begin_shape_index: s.way_points?.[0] ?? 0,
-          instruction: s.instruction,
-          length: (s.distance ?? 0) / 1609.344,
-          time: s.duration ?? 0,
-          type: ORS_TO_VALHALLA[s.type] ?? 5,
+        const path = res.paths?.[0];
+        if (!path) throw new Error('No route found between these points.');
+        const coords = path.points.coordinates.map(([ln, la]) => [la, ln] as [number, number]);
+        const maneuvers: ValhallaManeuver[] = (path.instructions ?? []).map((inst) => ({
+          begin_shape_index: inst.interval?.[0] ?? 0,
+          instruction: inst.text,
+          length: (inst.distance ?? 0) / 1609.344,
+          time: Math.round((inst.time ?? 0) / 1000),
+          type: GH_SIGN_TO_VALHALLA[inst.sign] ?? 5,
         }));
         return {
           geometry: coords,
-          distance: Math.round(feat.properties.summary.distance),
-          duration: feat.properties.summary.duration,
+          distance: Math.round(path.distance),
+          duration: Math.round(path.time / 1000),
           maneuvers,
         };
-      };
-
-      const routePass = async (excludePolys: number[][][], retries = 1) => {
-        if (ORS_KEY) {
-          try {
-            return await orsRoute(excludePolys);
-          } catch {
-            // fall back to the public Valhalla instance
-          }
-        }
-        return valhallaRoute(excludePolys, retries);
       };
 
       const boxAround = (lat: number, lng: number, m: number): number[][] => {
@@ -838,10 +817,21 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
       };
 
 
-      let route = await routePass([], 2);
+      let valhallaServed = true;
+      let route: Awaited<ReturnType<typeof valhallaRoute>>;
+      if (GH_KEY) {
+        try {
+          route = await valhallaRoute([], 1, 10000);
+        } catch {
+          route = await ghRoute();
+          valhallaServed = false;
+        }
+      } else {
+        route = await valhallaRoute([], 2);
+      }
       const excluded = new Set<string>();
       let pass = 0;
-      while (pass < 3) {
+      while (valhallaServed && pass < 3) {
         const { cameraHits } = scoreRoute(route.geometry);
         if (cameraHits.length === 0) break;
 
@@ -857,7 +847,7 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
         }
         if (polys.length === 0) break;
         try {
-          const newRoute = await routePass(
+          const newRoute = await valhallaRoute(
             [...Array.from(excluded)].map((k) => {
               const [lat, lng] = k.split(',').map(Number);
               return boxAround(lat, lng, 160);
