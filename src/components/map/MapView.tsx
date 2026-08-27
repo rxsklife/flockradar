@@ -385,6 +385,22 @@ export default function MapView() {
       featuresRef.current = features;
       setMarkerCount(features.length);
       renderMarkers(features);
+
+      const hasFitFilter =
+        f.entityType || f.status || f.vendor || f.sourceStrength || f.pointType;
+      if (hasFitFilter && features.length > 0) {
+        const m = map.current;
+        if (m) {
+          const bounds = L.latLngBounds([]);
+          for (const feat of features) {
+            const c = feat.geometry.coordinates as [number, number];
+            bounds.extend([c[1], c[0]]);
+          }
+          if (bounds.isValid()) {
+            m.fitBounds(bounds, { padding: [60, 60], maxZoom: 14 });
+          }
+        }
+      }
     },
     [renderMarkers],
   );
@@ -800,7 +816,7 @@ export default function MapView() {
     const drawUserDot = (ll: [number, number], accuracy: number) => {
       const dotGroup = L.layerGroup([
         L.circle(ll, {
-          radius: Math.max(accuracy, 20),
+          radius: Math.min(Math.max(accuracy, 20), 100),
           color: '#3b82f6',
           weight: 1,
           opacity: 0.35,
