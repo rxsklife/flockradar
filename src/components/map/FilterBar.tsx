@@ -11,7 +11,6 @@ interface FilterBarProps {
   onToggleCommunity?: (on: boolean) => void;
   communityLoading?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onReportCamera?: () => void;
 }
 
 const ENTITY_TYPES = [
@@ -40,7 +39,6 @@ export default function FilterBar({
   onToggleCommunity,
   communityLoading = false,
   onOpenChange,
-  onReportCamera,
 }: FilterBarProps) {
   const isMobile = variant === 'mobile';
 
@@ -206,12 +204,6 @@ export default function FilterBar({
               <p className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 text-[11px] leading-snug text-amber-400">
                 Community reported. Unverified.
               </p>
-              <button
-                onClick={onReportCamera}
-                className="btn-secondary block w-full px-3! py-2! text-xs! font-semibold!"
-              >
-                Report a camera
-              </button>
             </div>
           )}
         </div>

@@ -1030,12 +1030,10 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
     const measure = () => {
       const el = panelRef.current;
       if (!el) return;
-      const filtersBtn = document.querySelector('button[aria-label="Toggle filters"]');
-      const btnVisible = !!filtersBtn && getComputedStyle(filtersBtn).display !== 'none';
       const footer = document.querySelector('footer');
       const boundary =
-        btnVisible && filtersBtn
-          ? filtersBtn.getBoundingClientRect().top
+        window.innerWidth < 640
+          ? window.innerHeight
           : footer
             ? footer.getBoundingClientRect().top
             : window.innerHeight;
@@ -1051,12 +1049,10 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
   const [navMaxH, setNavMaxH] = useState<number | undefined>(undefined);
   useEffect(() => {
     const measure = () => {
-      const filtersBtn = document.querySelector('button[aria-label="Toggle filters"]');
-      const btnVisible = !!filtersBtn && getComputedStyle(filtersBtn).display !== 'none';
       const footer = document.querySelector('footer');
       const boundary =
-        btnVisible && filtersBtn
-          ? filtersBtn.getBoundingClientRect().top
+        window.innerWidth < 640
+          ? window.innerHeight
           : footer
             ? footer.getBoundingClientRect().top
             : window.innerHeight;
