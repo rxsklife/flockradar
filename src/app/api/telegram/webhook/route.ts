@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { submissions, corrections, changelog, leads, abuseCases } from '@/db/schema';
+import { submissions, corrections, changelog, leads, abuseCases, cameraReports, entities, deployments, locations } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import {
   answerCallback,
@@ -11,7 +11,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-type Kind = 'tip' | 'correction' | 'lead' | 'abuse';
+type Kind = 'tip' | 'correction' | 'lead' | 'abuse' | 'camera';
 
 const OUTCOME_TEXT: Record<'approved' | 'denied', string> = {
   approved: '\u2705 Approved',
@@ -76,6 +76,20 @@ async function findItem(kind: Kind, id: string) {
       contactEmail: null,
     };
   }
+  if (kind === 'camera') {
+    const [row] = await db
+      .select()
+      .from(cameraReports)
+      .where(eq(cameraReports.id, id))
+      .limit(1);
+    if (!row) return null;
+    return {
+      title: `Camera report at ${row.latitude.toFixed(5)}, ${row.longitude.toFixed(5)}`,
+      summary: row.notes || '(no details)',
+      sourceUrl: null,
+      contactEmail: null,
+    };
+  }
   const [row] = await db
     .select()
     .from(corrections)
@@ -98,8 +112,10 @@ async function applyDecision(kind: Kind, id: string, approve: boolean) {
         ? corrections
         : kind === 'lead'
           ? leads
-          : abuseCases;
-  const status = approve ? 'accepted' : 'rejected';
+          : kind === 'camera'
+            ? cameraReports
+            : abuseCases;
+  const status = approve ? 'approved' : 'rejected';
   const [row] = await db
     .update(table)
     .set({ status, reviewedAt: new Date(), updatedAt: new Date() })
@@ -110,6 +126,60 @@ async function applyDecision(kind: Kind, id: string, approve: boolean) {
 
   if (approve) {
     const item = await findItem(kind, id);
+
+    if (kind === 'camera') {
+      const [report] = await db
+        .select()
+        .from(cameraReports)
+        .where(eq(cameraReports.id, id))
+        .limit(1);
+      if (report) {
+        let city: string | null = null;
+        let state = 'XX';
+        try {
+          const g = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${report.latitude}&lon=${report.longitude}&zoom=10`,
+            { headers: { 'User-Agent': 'FlockRadar-camera-approval/0.1' }, signal: AbortSignal.timeout(8000) },
+          );
+          const geo = (await g.json()) as { address?: { state_code?: string; state?: string; city?: string; town?: string; village?: string } };
+          state =
+            (geo.address?.state_code ?? geo.address?.state ?? '').slice(0, 2).toUpperCase() || 'XX';
+          city = geo.address?.city ?? geo.address?.town ?? geo.address?.village ?? null;
+        } catch {
+          // keep defaults
+        }
+        const [entity] = await db
+          .insert(entities)
+          .values({
+            name: `Community reported camera${city ? ` - ${city}` : ''}`,
+            entityType: 'other',
+            city,
+            state,
+            programStatus: 'unknown',
+            vendor: 'unknown',
+          })
+          .returning({ id: entities.id });
+        const [deployment] = await db
+          .insert(deployments)
+          .values({
+            entityId: entity.id,
+            systemType: 'unknown',
+            status: 'confirmed_active',
+            cameraCount: 1,
+          })
+          .returning({ id: deployments.id });
+        await db.insert(locations).values({
+          deploymentId: deployment.id,
+          latitude: report.latitude,
+          longitude: report.longitude,
+          precisionLevel: 'exact',
+          locationStatus: 'verified_submission',
+          description: report.notes,
+          publicVisible: true,
+        });
+      }
+    }
+
     await db.insert(changelog).values({
       entityName: item?.title ?? 'Community submission',
       action: kind === 'correction' ? 'corrected' : 'created',
@@ -120,7 +190,9 @@ async function applyDecision(kind: Kind, id: string, approve: boolean) {
             ? `Correction approved and applied (${shortRef(kind, id)}).`
             : kind === 'lead'
               ? `New deployment lead approved and published (${shortRef(kind, id)}).`
-              : `New abuse case approved and published (${shortRef(kind, id)}).`,
+              : kind === 'camera'
+                ? `New community camera report approved and mapped (${shortRef(kind, id)}).`
+                : `New abuse case approved and published (${shortRef(kind, id)}).`,
       sourceUrl: item?.sourceUrl ?? null,
     });
   }
@@ -134,13 +206,13 @@ async function handleCallback(cq: NonNullable<TelegramUpdate['callback_query']>)
     await answerCallback(cq.id, 'Unknown sender');
     return;
   }
-  const match = /^(approve|deny):(tip|correction|lead|abuse):([0-9a-f-]+)$/.exec(cq.data ?? '');
+  const match = /^(approve|deny):(tip|correction|lead|abuse|camera):([0-9a-f-]+)$/.exec(cq.data ?? '');
   if (!match) {
     await answerCallback(cq.id, 'Unrecognized action');
     return;
   }
   const [, action, rawKind, id] = match;
-  const kind: Kind = rawKind === 'tip' ? 'tip' : rawKind === 'correction' ? 'correction' : rawKind === 'lead' ? 'lead' : 'abuse';
+  const kind: Kind = rawKind === 'tip' ? 'tip' : rawKind === 'correction' ? 'correction' : rawKind === 'lead' ? 'lead' : rawKind === 'camera' ? 'camera' : 'abuse';
   const approve = action === 'approve';
 
   await answerCallback(cq.id, approve ? 'Approving\u2026' : 'Denying\u2026');

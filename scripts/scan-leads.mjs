@@ -70,47 +70,10 @@ try {
       on conflict (url) do nothing
       returning id, url
     `;
-    if (!row) continue;
-    const res = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: process.env.TELEGRAM_CHAT_ID,
-        text: [
-          `\u{1F50D} NEW LEAD ${row.id.slice(0, 4).toUpperCase()}`,
-          `\u{1F3E2} ${i.title}`,
-          i.source ? `\u{1F4CE} ${i.source}` : null,
-          `\u{1F517} ${i.link}`,
-        ].filter(Boolean).join('\n'),
-        disable_web_page_preview: true,
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: '\u2705 Approve', callback_data: `approve:lead:${row.id}` },
-              { text: '\u274C Deny', callback_data: `deny:lead:${row.id}` },
-            ],
-          ],
-        },
-      }),
-    });
-    const json = await res.json();
-    if (json.ok) sent += 1;
-    else console.error('sendMessage failed:', JSON.stringify(json));
+    if (row) sent += 1;
   }
 
-  if (updates > 0) {
-    await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: process.env.TELEGRAM_CHAT_ID,
-        text: `\u{1F4CC} ${updates} mentions of already-mapped entities (no action needed).`,
-        disable_web_page_preview: true,
-      }),
-    });
-  }
-
-  console.log(`Inserted ${sent} pending leads; ${updates} known-entity mentions skipped.`);
+  console.log(`Inserted ${sent} pending leads; ${updates} known-entity mentions skipped (no Telegram alerts).`);
 } finally {
   await sql.end();
 }

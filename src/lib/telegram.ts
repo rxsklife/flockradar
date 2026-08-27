@@ -1,7 +1,7 @@
 
 
 export interface ReviewItem {
-  kind: 'tip' | 'correction' | 'lead' | 'abuse';
+  kind: 'tip' | 'correction' | 'lead' | 'abuse' | 'camera';
   id: string;
   title: string;
   summary: string;
@@ -39,7 +39,7 @@ async function tgFetch(method: string, payload: Record<string, unknown>): Promis
 
 export function shortRef(kind: ReviewItem['kind'], id: string): string {
   const prefix =
-    kind === 'tip' ? 'TIP' : kind === 'correction' ? 'COR' : kind === 'lead' ? 'LEAD' : 'ABU';
+    kind === 'tip' ? 'TIP' : kind === 'correction' ? 'COR' : kind === 'lead' ? 'LEAD' : kind === 'camera' ? 'CAM' : 'ABU';
   return `${prefix}-${id.slice(0, 4).toUpperCase()}`;
 }
 
@@ -111,4 +111,60 @@ export async function sendOwnerMessage(text: string): Promise<boolean> {
     parse_mode: 'HTML',
     disable_web_page_preview: true,
   });
+}
+
+export async function sendCameraReport(report: {
+  id: string;
+  lat: number;
+  lng: number;
+  photo: string | null;
+  notes: string | null;
+}): Promise<boolean> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return false;
+  const ref = `ABU-${report.id.slice(0, 4).toUpperCase()}`;
+  const caption = [
+    `📸 NEW CAMERA REPORT ${ref}`,
+    `📍 ${report.lat.toFixed(5)}, ${report.lng.toFixed(5)}`,
+    report.notes ? `📝 ${report.notes}` : null,
+  ]
+    .filter(Boolean)
+    .join('\n');
+  const keyboard = {
+    inline_keyboard: [
+      [
+        { text: '\u2705 Approve', callback_data: `approve:camera:${report.id}` },
+        { text: '\u274C Deny', callback_data: `deny:camera:${report.id}` },
+      ],
+    ],
+  };
+  try {
+    if (report.photo) {
+      const base64 = report.photo.split(',')[1] ?? report.photo;
+      const mime = report.photo.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+      const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+      const fd = new FormData();
+      fd.append('chat_id', String(chatId));
+      fd.append('photo', new Blob([bytes], { type: mime }), 'camera-report.jpg');
+      fd.append('caption', caption);
+      fd.append('reply_markup', JSON.stringify(keyboard));
+      const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+        method: 'POST',
+        body: fd,
+        signal: AbortSignal.timeout(15000),
+      });
+      const json = (await res.json()) as { ok?: boolean };
+      return json.ok === true;
+    }
+    return tgFetch('sendMessage', {
+      chat_id: chatId,
+      text: caption,
+      disable_web_page_preview: true,
+      reply_markup: keyboard,
+    });
+  } catch (err) {
+    console.error('[telegram] camera report failed:', err instanceof Error ? err.message : err);
+    return false;
+  }
 }

@@ -218,3 +218,15 @@ export const abuseCases = pgTable('abuse_cases', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+export const cameraReports = pgTable('camera_reports', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  latitude: doublePrecision('latitude').notNull(),
+  longitude: doublePrecision('longitude').notNull(),
+  photoFileId: varchar('photo_file_id', { length: 255 }),
+  notes: text('notes'),
+  status: varchar('status', { length: 20 }).notNull().default('pending'),
+  reviewedAt: timestamp('reviewed_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});

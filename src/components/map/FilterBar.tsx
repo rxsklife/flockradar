@@ -10,6 +10,8 @@ interface FilterBarProps {
   communityLayerOn?: boolean;
   onToggleCommunity?: (on: boolean) => void;
   communityLoading?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onReportCamera?: () => void;
 }
 
 const ENTITY_TYPES = [
@@ -37,6 +39,8 @@ export default function FilterBar({
   communityLayerOn = false,
   onToggleCommunity,
   communityLoading = false,
+  onOpenChange,
+  onReportCamera,
 }: FilterBarProps) {
   const isMobile = variant === 'mobile';
 
@@ -46,7 +50,10 @@ export default function FilterBar({
   if (!isMobile && !open) {
     return (
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true);
+          onOpenChange?.(true);
+        }}
         className="hud-chip absolute right-4 top-4 z-[1000] hidden! gap-1.5 px-3 py-2 text-xs font-semibold sm:flex!"
         aria-label="Open filters"
       >
@@ -72,7 +79,10 @@ export default function FilterBar({
         </h3>
         {!isMobile && (
           <button
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false);
+              onOpenChange?.(false);
+            }}
             className="rounded p-0.5 text-steel-400 transition-colors hover:bg-navy-800 hover:text-steel-100"
             aria-label="Close filters"
           >
@@ -83,7 +93,7 @@ export default function FilterBar({
         )}
       </div>
 
-      <div className="mb-3">
+      <div className={isMobile ? 'mb-2' : 'mb-3'}>
         <label className="mb-1 block text-xs text-steel-300">State</label>
         <select
           value={filters.state || ''}
@@ -99,7 +109,7 @@ export default function FilterBar({
         </select>
       </div>
 
-      <div className="mb-3">
+      <div className={isMobile ? 'mb-2' : 'mb-3'}>
         <label className="mb-1 block text-xs text-steel-300">Status</label>
         <select
           value={filters.status || ''}
@@ -115,7 +125,7 @@ export default function FilterBar({
         </select>
       </div>
 
-      <div className="mb-3">
+      <div className={isMobile ? 'mb-2' : 'mb-3'}>
         <label className="mb-1 block text-xs text-steel-300">Entity type</label>
         <select
           value={filters.entityType || ''}
@@ -131,7 +141,7 @@ export default function FilterBar({
         </select>
       </div>
 
-      <div className="mb-3">
+      <div className={isMobile ? 'mb-2' : 'mb-3'}>
         <label className="mb-1 block text-xs text-steel-300">Vendor</label>
         <select
           value={filters.vendor || ''}
@@ -147,7 +157,7 @@ export default function FilterBar({
         </select>
       </div>
 
-      <div className="mb-3">
+      <div className={isMobile ? 'mb-2' : 'mb-3'}>
         <label className="mb-1 block text-xs text-steel-300">Evidence level</label>
         <select
           value={filters.sourceStrength || ''}
@@ -196,12 +206,12 @@ export default function FilterBar({
               <p className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 text-[11px] leading-snug text-amber-400">
                 Community reported. Unverified.
               </p>
-              <a
-                href="/submit"
+              <button
+                onClick={onReportCamera}
                 className="btn-secondary block w-full px-3! py-2! text-xs! font-semibold!"
               >
                 Report a camera
-              </a>
+              </button>
             </div>
           )}
         </div>

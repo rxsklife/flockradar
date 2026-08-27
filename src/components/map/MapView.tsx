@@ -13,6 +13,7 @@ import PrivacyRoute from './PrivacyRoute';
 import FilterBar from './FilterBar';
 import Legend from './Legend';
 import TutorialHint from './TutorialHint';
+import ReportCamera from './ReportCamera';
 
 const MAP_CENTER: [number, number] = [38.5, -92.6];
 const MAP_ZOOM = 6;
@@ -284,6 +285,8 @@ export default function MapView() {
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
   const [filters, setFilters] = useState<Filters>({});
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [markerCount, setMarkerCount] = useState<number | null>(null);
   const [communityOn, setCommunityOn] = useState(true);
   const [communityLoading, setCommunityLoading] = useState(false);
@@ -921,13 +924,15 @@ export default function MapView() {
       {mapReady && mapInstance && <PrivacyRoute map={mapInstance} />}
       {mapReady && <TutorialHint />}
 
-      <button
-        onClick={() => setShowMobileFilters((v) => !v)}
-        className="hud-chip absolute bottom-4 left-4 z-[1200] px-4 py-2 text-sm font-semibold sm:hidden!"
-        aria-label="Toggle filters"
-      >
-        {showMobileFilters ? 'Close' : 'Filters'}
-      </button>
+      {!showMobileFilters && (
+        <button
+          onClick={() => setShowMobileFilters(true)}
+          className="hud-chip absolute bottom-4 left-4 z-[1200] px-4 py-2 text-sm font-semibold sm:hidden!"
+          aria-label="Open filters"
+        >
+          Filters
+        </button>
+      )}
 
       {streetView && (
         <div
@@ -991,13 +996,19 @@ export default function MapView() {
         communityLayerOn={communityOn}
         onToggleCommunity={toggleCommunityLayer}
         communityLoading={communityLoading}
+        onOpenChange={setFilterPanelOpen}
+        onReportCamera={() => setReportOpen(true)}
       />
-      <Legend />
+      {!filterPanelOpen && <Legend />}
+
+      {reportOpen && mapInstance && (
+        <ReportCamera map={mapInstance} onClose={() => setReportOpen(false)} />
+      )}
 
       {showMobileFilters && (
         <div className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:hidden!">
           <div className="hud-panel hud-card flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden shadow-[0_24px_80px_rgba(2,8,16,0.7)]">
-          <div className="flex shrink-0 items-center justify-between border-b border-radar-500/20 px-4 py-3">
+          <div className="flex shrink-0 items-center justify-between border-b border-radar-500/20 pl-4 pr-2 py-3">
             <p className="mono-data text-[10px] uppercase tracking-[0.18em] text-steel-300">
               Filter deployments
             </p>
@@ -1009,7 +1020,7 @@ export default function MapView() {
               Close
             </button>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          <div className="min-h-0 flex-1 overflow-y-auto p-3">
             <FilterBar
               filters={filters}
               onChange={handleMobileFilterChange}
@@ -1017,6 +1028,7 @@ export default function MapView() {
               communityLayerOn={communityOn}
               onToggleCommunity={toggleCommunityLayer}
               communityLoading={communityLoading}
+              onReportCamera={() => setReportOpen(true)}
             />
           </div>
           </div>
