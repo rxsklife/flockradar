@@ -898,8 +898,8 @@ select optgroup {
     text-align: center;
   }
   .hud-card .hud-header-strip,
-  .hud-card .flex,
-  .card-lift .flex {
+  .hud-card .flex:not(.justify-between),
+  .card-lift .flex:not(.justify-between) {
     justify-content: center;
   }
   
