@@ -28,6 +28,7 @@ interface RouteResult {
 
 interface PrivacyRouteProps {
   map: L.Map | null;
+  onRouteStateChange?: (active: boolean) => void;
 }
 
 const EXPOSURE_RADIUS_M = 120;
@@ -451,7 +452,7 @@ function haversineM(a: { lat: number; lng: number }, b: { lat: number; lng: numb
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-export default function PrivacyRoute({ map }: PrivacyRouteProps) {
+export default function PrivacyRoute({ map, onRouteStateChange }: PrivacyRouteProps) {
   const [open, setOpen] = useState(false);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -1023,6 +1024,10 @@ export default function PrivacyRoute({ map }: PrivacyRouteProps) {
       setSavingPhoto(false);
     }
   }, [map]);
+
+  useEffect(() => {
+    onRouteStateChange?.(result !== null);
+  }, [result, onRouteStateChange]);
 
   const [panelMaxH, setPanelMaxH] = useState<number | undefined>(undefined);
   const panelRef = useRef<HTMLDivElement | null>(null);

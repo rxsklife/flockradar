@@ -287,6 +287,7 @@ export default function MapView() {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [routeActive, setRouteActive] = useState(false);
   const [markerCount, setMarkerCount] = useState<number | null>(null);
   const [communityOn, setCommunityOn] = useState(true);
   const [communityLoading, setCommunityLoading] = useState(false);
@@ -921,10 +922,12 @@ export default function MapView() {
       <div className="hidden sm:block">
         <SearchBar onSelect={flyToEntity} />
       </div>
-      {mapReady && mapInstance && <PrivacyRoute map={mapInstance} />}
+      {mapReady && mapInstance && (
+        <PrivacyRoute map={mapInstance} onRouteStateChange={setRouteActive} />
+      )}
       {mapReady && <TutorialHint />}
 
-      {!showMobileFilters && (
+      {!showMobileFilters && !routeActive && (
         <button
           onClick={() => setShowMobileFilters(true)}
           className="hud-chip absolute bottom-4 left-4 z-[1200] px-4 py-2 text-sm font-semibold sm:hidden!"
@@ -1033,7 +1036,7 @@ export default function MapView() {
         </div>
       )}
 
-      {showLocateButton && userLocation && (
+      {showLocateButton && userLocation && !routeActive && (
         <button
           onClick={() => {
             const m = map.current;
@@ -1041,7 +1044,7 @@ export default function MapView() {
 
             if (m && userLocation) m.setView(userLocation, 17, { animate: false });
           }}
-          className="absolute bottom-20 left-4 z-[1000] flex h-11 w-11 items-center justify-center rounded-full border border-radar-500/45 bg-navy-950/80 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:bg-navy-900/80 hover:text-steel-200 sm:bottom-4"
+          className="absolute bottom-36 left-4 z-[1000] flex h-11 w-11 items-center justify-center rounded-full border border-radar-500/45 bg-navy-950/80 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:bg-navy-900/80 hover:text-steel-200 sm:bottom-4"
           aria-label="Snap back to my location"
           title="Back to my location"
         >
@@ -1052,9 +1055,10 @@ export default function MapView() {
         </button>
       )}
 
-      <button
-        onClick={() => setReportOpen(true)}
-        className="hud-chip absolute bottom-36 left-4 z-[1000] gap-1.5 px-3 py-2 text-xs font-semibold text-steel-200 hover:text-radar-300 sm:bottom-16"
+      {!routeActive && (
+        <button
+          onClick={() => setReportOpen(true)}
+        className="hud-chip absolute bottom-20 left-4 z-[1000] gap-1.5 px-3 py-2 text-xs font-semibold text-steel-200 hover:text-radar-300 sm:bottom-16"
         aria-label="Report a camera"
       >
         <svg
@@ -1073,6 +1077,7 @@ export default function MapView() {
         </svg>
         Report a camera
       </button>
+      )}
     </div>
   );
 }
