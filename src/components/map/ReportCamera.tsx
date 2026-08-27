@@ -127,7 +127,7 @@ export default function ReportCamera({ map, onClose }: ReportCameraProps) {
   }, [pos, photo, notes]);
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[1400] flex items-start justify-center p-3 sm:p-6">
+    <div className="pointer-events-none absolute inset-0 z-[1400] flex items-start justify-center p-3 sm:p-6">
       <div className="pointer-events-auto hud-panel hud-card flex w-full max-w-sm flex-col space-y-2 overflow-hidden p-3">
         <div className="flex items-center justify-between gap-2">
           <p className="mono-data text-[10px] uppercase tracking-[0.18em] text-steel-300">
