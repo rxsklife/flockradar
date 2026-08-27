@@ -17,16 +17,8 @@ import TutorialHint from './TutorialHint';
 const MAP_CENTER: [number, number] = [38.5, -92.6];
 const MAP_ZOOM = 6;
 
-const TILE_URL = 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
+const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
-
-const DETAILED_TILE_URL = 'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
-const DETAILED_TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
-
-const FALLBACK_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-const FALLBACK_TILE_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 const STATE_CENTERS: Record<string, [number, number]> = {
@@ -223,23 +215,23 @@ function communityCameraPopupHtml(
 
   const mapsUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
   return `
-    <div class="community-popup" style="min-width: 220px;">
-      <p class="community-popup-title" style="margin:0 0 6px;font-weight:600;font-size:13px;color:#e6f0fa;">Community Reported Camera</p>
+    <div class="popup-body" style="min-width: 220px;">
+      <p class="popup-title">Community Reported Camera</p>
       ${
         address
-          ? `<a href="${mapsUrl}" onclick="window.__flockOpenStreetView(${lat},${lng});return false;" style="display:block;margin:0 0 4px;font-size:12px;color:#20b8c8;text-decoration:none;line-height:1.4;cursor:pointer;" title="Open in Street View">${escapeHtml(address)}</a>`
+          ? `<a href="${mapsUrl}" onclick="window.__flockOpenStreetView(${lat},${lng});return false;" style="display:block;margin:0 0 4px;font-size:12px;color:#5fe0ec;text-decoration:none;line-height:1.4;cursor:pointer;" title="Open in Street View">${escapeHtml(address)}</a>`
           : `<p style="margin:0 0 4px;font-size:12px;color:#8fa3b8;">Looking up address…</p>`
       }
-      <p class="community-popup-coords" style="margin:0 0 2px;font-size:12px;color:#8fa3b8;font-family:monospace;">
+      <p style="margin:0 0 2px;font-size:12px;color:#64748b;font-family:monospace;">
         ${latS}, ${lngS}
       </p>
-      <p style="margin:0 0 8px;font-size:11px;color:#8fa3b8;">
+      <p style="margin:0 0 8px;font-size:11px;color:#64748b;">
         Crowdsourced, unverified. May not be an actual camera.
       </p>
       <a
         href="${mapsUrl}"
         onclick="window.__flockOpenStreetView(${lat},${lng});return false;"
-        style="display:block;text-align:center;padding:6px 10px;border-radius:6px;background:#20b8c8;color:#0f1f30;font-weight:600;font-size:12px;text-decoration:none;cursor:pointer;"
+        class="popup-streetview"
       >
         Open in Street View ↗
       </a>
@@ -297,13 +289,11 @@ export default function MapView() {
   const [communityLoading, setCommunityLoading] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
-  const [basemap, setBasemap] = useState<'dark' | 'detailed'>('detailed');
   const tileLayerRef = useRef<L.TileLayer | null>(null);
   const featuresRef = useRef<GeoJSONFeature[]>([]);
 
 
   const tileErrorsRef = useRef(0);
-  const fallbackActiveRef = useRef(false);
 
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const userLocationRef = useRef<[number, number] | null>(null);
@@ -655,60 +645,16 @@ export default function MapView() {
   );
 
 
-  const createTileLayer = useCallback((mode: 'dark' | 'detailed' | 'fallback') => {
-    let url: string;
-    let attribution: string;
-    if (mode === 'fallback') {
-      url = FALLBACK_TILE_URL;
-      attribution = FALLBACK_TILE_ATTRIBUTION;
-    } else if (mode === 'detailed') {
-      url = DETAILED_TILE_URL;
-      attribution = DETAILED_TILE_ATTRIBUTION;
-    } else {
-      url = TILE_URL;
-      attribution = TILE_ATTRIBUTION;
-    }
-    const layer = L.tileLayer(url, { attribution, maxZoom: 19 });
+  const createTileLayer = useCallback(() => {
+    const layer = L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION, maxZoom: 19 });
     layer.on('tileerror', () => {
       tileErrorsRef.current += 1;
-
-      if (tileErrorsRef.current >= 3 && !fallbackActiveRef.current) {
-        fallbackActiveRef.current = true;
-        console.warn('FlockRadar: CARTO tiles blocked; switching to OSM fallback basemap');
-        const m = map.current;
-        if (m) {
-          m.removeLayer(layer);
-          const fallback = L.tileLayer(FALLBACK_TILE_URL, {
-            attribution: FALLBACK_TILE_ATTRIBUTION,
-            maxZoom: 19,
-          });
-          tileLayerRef.current = fallback;
-          fallback.addTo(m);
-          fallback.bringToBack();
-        }
-      }
     });
     layer.on('load', () => {
       tileErrorsRef.current = 0;
     });
     return layer;
   }, []);
-
-
-  const handleBasemapChange = useCallback(
-    (mode: 'dark' | 'detailed') => {
-      const m = map.current;
-      if (!m) return;
-      setBasemap(mode);
-      const current = tileLayerRef.current;
-      if (current) m.removeLayer(current);
-      const next = createTileLayer(mode);
-      tileLayerRef.current = next;
-      next.addTo(m);
-      next.bringToBack();
-    },
-    [createTileLayer],
-  );
 
 
   const handleMobileFilterChange = useCallback(
@@ -771,7 +717,7 @@ export default function MapView() {
       attributionControl: true,
     });
 
-    const tileLayer = createTileLayer('detailed');
+    const tileLayer = createTileLayer();
     tileLayerRef.current = tileLayer;
     tileLayer.addTo(m);
 
@@ -966,7 +912,7 @@ export default function MapView() {
     <div className="relative flex-1 w-full min-h-0">
       <div
         ref={mapContainer}
-        className={`absolute inset-0 ${basemap === 'detailed' ? 'basemap-detailed' : 'basemap-dark'}`}
+        className="absolute inset-0 basemap-detailed"
       />
 
       <div className="hidden sm:block">
@@ -1045,8 +991,6 @@ export default function MapView() {
         communityLayerOn={communityOn}
         onToggleCommunity={toggleCommunityLayer}
         communityLoading={communityLoading}
-        basemap={basemap}
-        onBasemapChange={handleBasemapChange}
       />
       <Legend />
 
@@ -1073,8 +1017,6 @@ export default function MapView() {
               communityLayerOn={communityOn}
               onToggleCommunity={toggleCommunityLayer}
               communityLoading={communityLoading}
-              basemap={basemap}
-              onBasemapChange={handleBasemapChange}
             />
           </div>
           </div>

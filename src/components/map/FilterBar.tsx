@@ -10,8 +10,6 @@ interface FilterBarProps {
   communityLayerOn?: boolean;
   onToggleCommunity?: (on: boolean) => void;
   communityLoading?: boolean;
-  basemap?: 'dark' | 'detailed';
-  onBasemapChange?: (mode: 'dark' | 'detailed') => void;
 }
 
 const ENTITY_TYPES = [
@@ -39,8 +37,6 @@ export default function FilterBar({
   communityLayerOn = false,
   onToggleCommunity,
   communityLoading = false,
-  basemap = 'dark',
-  onBasemapChange,
 }: FilterBarProps) {
   const isMobile = variant === 'mobile';
 
@@ -176,35 +172,6 @@ export default function FilterBar({
           <option value="exact">Exact locations only</option>
         </select>
       </div>
-
-      {onBasemapChange && (
-        <div className="mt-3 border-t border-radar-500/20 pt-3">
-          <label className="mb-1 block text-xs text-steel-300">Basemap</label>
-          <div className="hud-chip w-full grid-cols-2 gap-1 rounded-md p-1">
-            <button
-              onClick={() => onBasemapChange('dark')}
-              className={`hud-chip rounded px-2 py-1 text-xs font-semibold transition-colors ${
-                basemap === 'dark'
-                  ? 'bg-radar-500/20! text-radar-300!'
-                  : 'text-steel-400 hover:text-steel-200'
-              }`}
-            >
-              Dark
-            </button>
-            <button
-              onClick={() => onBasemapChange('detailed')}
-              className={`hud-chip rounded px-2 py-1 text-xs font-semibold transition-colors ${
-                basemap === 'detailed'
-                  ? 'bg-radar-500/20! text-radar-300!'
-                  : 'text-steel-400 hover:text-steel-200'
-              }`}
-              title="Shows business names and points of interest"
-            >
-              Detailed
-            </button>
-          </div>
-        </div>
-      )}
 
       {onToggleCommunity && (
         <div className="mt-3 border-t border-radar-500/20 pt-3">

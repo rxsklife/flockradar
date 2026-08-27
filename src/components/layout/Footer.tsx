@@ -112,6 +112,17 @@ export default function Footer() {
             <SocialLinks iconClassName="h-5 w-5 sm:h-4 sm:w-4" />
           </span>
         </p>
+        <p className="mt-4 text-center text-[10px] text-steel-500 sm:text-[11px]">
+          Site designed by{' '}
+          <a
+            href="https://wds.wiki"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline transition-colors hover:text-radar-300"
+          >
+            Worldwide Digital Solutions
+          </a>
+        </p>
       </div>
     </footer>
   );
