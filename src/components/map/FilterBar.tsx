@@ -199,13 +199,6 @@ export default function FilterBar({
               </span>
             </span>
           </label>
-          {communityLayerOn && (
-            <div className="mt-2 space-y-2">
-              <p className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 text-[11px] leading-snug text-amber-400">
-                Community reported. Unverified.
-              </p>
-            </div>
-          )}
         </div>
       )}
     </div>

@@ -941,12 +941,12 @@ export default function MapView() {
       {mapReady && mapInstance && (
         <PrivacyRoute map={mapInstance} onRouteStateChange={setRouteActive} />
       )}
-      {mapReady && <TutorialHint />}
+      {mapReady && !showMobileFilters && <TutorialHint />}
 
       {!showMobileFilters && !routeActive && (
         <button
           onClick={() => setShowMobileFilters(true)}
-          className="hud-chip absolute bottom-20 left-4 z-[1200] px-4 py-2 text-sm font-semibold sm:hidden!"
+          className="hud-chip absolute bottom-14 left-4 z-[1200] px-4 py-2 text-sm font-semibold sm:hidden!"
           aria-label="Open filters"
         >
           Filters
@@ -1060,7 +1060,7 @@ export default function MapView() {
 
             if (m && userLocation) m.setView(userLocation, 17, { animate: false });
           }}
-          className="absolute bottom-36 left-4 z-[1000] flex h-11 w-11 items-center justify-center rounded-full border border-radar-500/45 bg-navy-950/80 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:bg-navy-900/80 hover:text-steel-200 sm:bottom-16"
+          className="absolute bottom-26 left-4 z-[1000] flex h-11 w-11 items-center justify-center rounded-full border border-radar-500/45 bg-navy-950/80 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_30px_rgba(2,8,16,0.45)] backdrop-blur-md backdrop-saturate-150 transition-colors hover:bg-navy-900/80 hover:text-steel-200 sm:bottom-16"
           aria-label="Snap back to my location"
           title="Back to my location"
         >
